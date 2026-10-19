@@ -31,6 +31,9 @@ type EventRow = {
   creator_name: string;
   created_at: string;
   updated_at: string;
+  participant_count: number;
+  /** SQLite n'a pas de booléen : EXISTS renvoie 0 ou 1. */
+  is_participating: 0 | 1;
 };
 
 function toEvent(row: EventRow): Event {
@@ -46,24 +49,42 @@ function toEvent(row: EventRow): Event {
     creatorName: row.creator_name,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
+    participantCount: row.participant_count,
+    isParticipating: row.is_participating === 1,
   };
 }
 
-// Jointure avec `users` pour afficher « Organisé par … » sans seconde requête.
+/**
+ * Requête de base, en une seule fois :
+ * - jointure avec `users` pour afficher « Organisé par … » ;
+ * - sous-requête COUNT pour le nombre de participants ;
+ * - EXISTS pour savoir si l'utilisateur connecté (le « ? ») participe.
+ * Une requête par écran, au lieu d'une requête par carte.
+ */
 const SELECT_EVENTS = `
-  SELECT e.*, u.name AS creator_name
+  SELECT e.*, u.name AS creator_name,
+    (SELECT COUNT(*) FROM participations p WHERE p.event_id = e.id) AS participant_count,
+    EXISTS (SELECT 1 FROM participations p WHERE p.event_id = e.id AND p.user_id = ?) AS is_participating
   FROM events e
   JOIN users u ON u.id = e.created_by
 `;
 
-/** Tous les événements, par date croissante (les dates ISO se trient comme du texte). */
-export async function listEvents(db: SQLiteDatabase): Promise<Event[]> {
-  const rows = await db.getAllAsync<EventRow>(`${SELECT_EVENTS} ORDER BY e.date ASC`);
+/**
+ * Événements vus par `userId`, par date croissante (les dates ISO se trient comme du texte).
+ * `onlyParticipating` : seulement ceux auxquels il participe (onglet Profil).
+ */
+export async function listEvents(
+  db: SQLiteDatabase,
+  userId: number,
+  { onlyParticipating = false }: { onlyParticipating?: boolean } = {},
+): Promise<Event[]> {
+  const where = onlyParticipating ? 'WHERE is_participating = 1' : '';
+  const rows = await db.getAllAsync<EventRow>(`${SELECT_EVENTS} ${where} ORDER BY e.date ASC`, userId);
   return rows.map(toEvent);
 }
 
-export async function getEvent(db: SQLiteDatabase, id: number): Promise<Event | null> {
-  const row = await db.getFirstAsync<EventRow>(`${SELECT_EVENTS} WHERE e.id = ?`, id);
+export async function getEvent(db: SQLiteDatabase, userId: number, id: number): Promise<Event | null> {
+  const row = await db.getFirstAsync<EventRow>(`${SELECT_EVENTS} WHERE e.id = ?`, userId, id);
   return row ? toEvent(row) : null;
 }
 

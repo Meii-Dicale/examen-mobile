@@ -95,6 +95,23 @@ export const fr = {
     errorDatePast: 'La date doit être dans le futur.',
     errorSave: "L'enregistrement a échoué, réessaie.",
   },
+  participation: {
+    join: 'Je participe',
+    joined: 'Tu participes',
+    // Événement passé : on peut encore indiquer qu'on y était (photos plus tard).
+    markAttended: "J'y ai participé",
+    attended: 'Tu y as participé',
+    cancelHint: 'Appuie pour annuler ta participation',
+    joinHint: 'Appuie pour indiquer ta participation',
+    badge: 'Inscrit·e',
+    error: "La participation n'a pas pu être enregistrée, réessaie.",
+    // Formulations neutres (« personne ») : pas besoin d'accorder au genre.
+    count: (count: number, past: boolean) => {
+      if (count === 0) return past ? "Personne n'y a participé" : 'Personne pour le moment';
+      if (count === 1) return past ? '1 personne a participé' : '1 personne participe';
+      return past ? `${count} personnes ont participé` : `${count} personnes participent`;
+    },
+  },
   calendar: {
     title: 'Calendrier',
     comingSoon: 'Le calendrier arrive dans une prochaine étape.',
@@ -104,6 +121,11 @@ export const fr = {
     memberSince: (date: string) => `Membre depuis le ${date}`,
     appearance: 'Apparence',
     account: 'Compte',
+    participations: 'Mes participations',
+    upcomingTab: (count: number) => `À venir · ${count}`,
+    pastTab: (count: number) => `Passés · ${count}`,
+    emptyUpcoming: 'Aucune participation à venir. Ouvre un événement et appuie sur « Je participe ».',
+    emptyPast: "Tu n'as encore participé à aucun événement passé.",
     signOut: 'Se déconnecter',
   },
 };
