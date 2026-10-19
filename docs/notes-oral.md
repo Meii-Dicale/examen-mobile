@@ -55,6 +55,19 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - La création s'ouvre en **modale** (`presentation: 'modal'`) : c'est une tâche courte qu'on ferme pour revenir où on était.
 - L'id passe dans l'URL (`/event/[id]`). `useLocalSearchParams` le renvoie en **chaîne**, d'où le `Number(id)`.
 
+**Participation** (feat/participation)
+- Une seule requête par écran : le nombre de participants (`COUNT`) et « est-ce que je participe ? » (`EXISTS`) sont des sous-requêtes. On évite le **problème N+1** (une requête par carte).
+- SQLite n'a pas de booléen : `EXISTS` renvoie 0 ou 1, converti en `true`/`false` dans `toEvent`.
+- La clé primaire `(user_id, event_id)` interdit les doublons. `INSERT OR IGNORE` rend un double appui sans effet.
+- On peut aussi indiquer sa participation à un événement **passé** (« J'y ai participé »), ce qui ouvrira l'ajout de photos.
+- Après un appui, on **relit** l'événement en base plutôt que de modifier l'état à la main : le bouton et le compteur restent forcément cohérents avec la base.
+
+**`useCurrentUserId` et la déconnexion** (piège évité)
+- À la déconnexion, `user` passe à `null` un instant **avant** que `Stack.Protected` retire les écrans connectés. Un hook qui lèverait une erreur ferait planter l'app à ce moment-là.
+- Le hook renvoie donc 0, qui ne correspond à aucun compte (AUTOINCREMENT commence à 1). Même une écriture serait refusée par la clé étrangère : c'est vérifié avec sqlite3.
+
+**Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
+
 **Pourquoi `SectionList` et pas `.map()` ?** Elle ne rend que les cartes visibles (virtualisation), gère les sections « À venir / Passés » et le « tirer pour rafraîchir ».
 
 **Pourquoi un Context pour le thème ?**
@@ -192,5 +205,8 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Pourquoi un sélecteur de date différent sur iOS et Android ? | Les composants natifs diffèrent. iOS a un sélecteur compact date + heure, Android seulement des boîtes de dialogue séparées, que j'ouvre avec `DateTimePickerAndroid.open`. Le formulaire reçoit toujours une date ISO. |
 | Comment tries-tu les événements par date ? | Les dates sont en ISO 8601, donc l'ordre alphabétique est l'ordre chronologique : un simple `ORDER BY date`, avec un index sur la colonne. |
 | Pourquoi une confirmation avant de supprimer ? | La suppression est définitive et entraîne celle des participations (CASCADE). L'`Alert` native évite une erreur sur un appui accidentel. |
+| Comment sais-tu si je participe, pour chaque carte ? | Une sous-requête `EXISTS` dans la même requête que la liste : une seule requête pour tout l'écran, pas une par carte (problème N+1). |
+| Que se passe-t-il si j'appuie deux fois sur « Je participe » ? | La clé primaire composite interdit le doublon, et `INSERT OR IGNORE` ignore la seconde insertion sans erreur. Le bouton est aussi désactivé pendant l'enregistrement. |
+| Pourquoi « 3 personnes participent » et pas « participants » ? | C'est une formulation neutre, sans accord au genre, qui gère aussi le pluriel et le passé. |
 | Pourquoi des hooks personnalisés ? | Pour séparer la logique (chargement, erreurs) de l'affichage, et la réutiliser sur plusieurs écrans. |
 | `useEffect` : à quoi sert la fonction renvoyée ? | C'est le nettoyage : elle s'exécute quand l'écran est démonté ou avant le prochain effet (annuler un minuteur, ignorer une requête en cours). |

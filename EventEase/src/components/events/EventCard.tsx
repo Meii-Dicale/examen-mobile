@@ -6,7 +6,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { fr } from '@/i18n/fr';
 import type { Event } from '@/types/event';
 import { radius, spacing, typography } from '@/theme/tokens';
-import { formatEventDate } from '@/utils/date';
+import { formatEventDate, isPast } from '@/utils/date';
 
 type Props = {
   event: Event;
@@ -15,16 +15,24 @@ type Props = {
   onPress: () => void;
 };
 
-/** Carte d'un événement dans la liste : date, titre, description, lieu. */
+/** Carte d'un événement dans la liste : date, titre, description, lieu, participants. */
 export function EventCard({ event, isMine, onPress }: Props) {
   const { colors } = useTheme();
   const date = formatEventDate(event.date);
+  const participants = fr.participation.count(event.participantCount, isPast(event.date));
 
   return (
     <Card
       onPress={onPress}
       // Une seule phrase pour le lecteur d'écran, au lieu de 4 éléments séparés.
-      accessibilityLabel={[event.title, date, event.locationName, isMine ? fr.events.mine : null]
+      accessibilityLabel={[
+        event.title,
+        date,
+        event.locationName,
+        isMine ? fr.events.mine : null,
+        event.isParticipating ? fr.participation.badge : null,
+        participants,
+      ]
         .filter(Boolean)
         .join(', ')}
     >
@@ -49,6 +57,18 @@ export function EventCard({ event, isMine, onPress }: Props) {
           </Text>
         </View>
       ) : null}
+      <View style={styles.footer}>
+        <View style={styles.location}>
+          <Feather name="users" size={14} color={colors.muted} />
+          <Text style={[typography.caption, { color: colors.muted }]}>{participants}</Text>
+        </View>
+        {event.isParticipating ? (
+          <View style={[styles.badge, styles.joined, { backgroundColor: colors.primarySoft }]}>
+            <Feather name="check" size={12} color={colors.primary} />
+            <Text style={[typography.caption, { color: colors.primary }]}>{fr.participation.badge}</Text>
+          </View>
+        ) : null}
+      </View>
     </Card>
   );
 }
@@ -59,4 +79,6 @@ const styles = StyleSheet.create({
   badge: { borderRadius: radius.pill, paddingHorizontal: spacing.sm, paddingVertical: 2 },
   location: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.xs },
   flex: { flex: 1 },
+  footer: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm },
+  joined: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs },
 });

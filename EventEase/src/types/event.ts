@@ -13,6 +13,10 @@ export type Event = {
   creatorName: string;
   createdAt: string;
   updatedAt: string;
+  /** Nombre de personnes qui participent. */
+  participantCount: number;
+  /** true si l'utilisateur connecté participe. */
+  isParticipating: boolean;
 };
 
 /** Ce que remplit le formulaire de création / modification. */

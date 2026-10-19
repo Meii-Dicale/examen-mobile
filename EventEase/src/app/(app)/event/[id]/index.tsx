@@ -11,6 +11,7 @@ import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadState } from '@/components/common/LoadState';
+import { ParticipationButton } from '@/components/events/ParticipationButton';
 import { Button, Card, Screen } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
@@ -18,7 +19,7 @@ import { useEvent } from '@/hooks/useEvent';
 import { useEventActions } from '@/hooks/useEventActions';
 import { fr } from '@/i18n/fr';
 import { spacing, typography } from '@/theme/tokens';
-import { formatEventDate } from '@/utils/date';
+import { formatEventDate, isPast } from '@/utils/date';
 
 const t = fr.eventDetail;
 
@@ -28,10 +29,25 @@ export default function EventDetail() {
   const eventId = Number(id);
   const { user } = useAuth();
   const { data: event, loading, error, reload } = useEvent(eventId);
-  const { remove } = useEventActions();
+  const { remove, toggleParticipation } = useEventActions();
   const [deleting, setDeleting] = useState(false);
+  const [toggling, setToggling] = useState(false);
 
   const isMine = event != null && event.createdBy === user?.id;
+
+  const handleToggle = async () => {
+    if (!event) return;
+    setToggling(true);
+    try {
+      await toggleParticipation(event.id, event.isParticipating);
+      // On relit l'événement : le bouton ET le compteur se mettent à jour ensemble.
+      reload();
+    } catch {
+      Alert.alert(fr.participation.error);
+    } finally {
+      setToggling(false);
+    }
+  };
 
   const confirmDelete = () => {
     // Confirmation native : une suppression ne doit jamais partir d'un appui accidentel.
@@ -66,7 +82,15 @@ export default function EventDetail() {
               <InfoRow icon="calendar" text={formatEventDate(event.date)} capitalize />
               {event.locationName ? <InfoRow icon="map-pin" text={event.locationName} /> : null}
               <InfoRow icon="user" text={isMine ? fr.events.mine : fr.events.organisedBy(event.creatorName)} />
+              <InfoRow icon="users" text={fr.participation.count(event.participantCount, isPast(event.date))} />
             </View>
+
+            <ParticipationButton
+              isParticipating={event.isParticipating}
+              isPast={isPast(event.date)}
+              onPress={handleToggle}
+              loading={toggling}
+            />
 
             <Card>
               <Text style={[typography.section, { color: colors.muted }]}>{t.description}</Text>

@@ -90,3 +90,15 @@ export function useAuth(): AuthContextValue {
   }
   return context;
 }
+
+/**
+ * Id de l'utilisateur connecté, pour les écrans du groupe (app).
+ *
+ * Ne lève pas d'erreur si personne n'est connecté : à la déconnexion, `user` passe
+ * à null un instant AVANT que Stack.Protected retire ces écrans. On renvoie alors 0,
+ * qui ne correspond à aucun compte (les id AUTOINCREMENT commencent à 1).
+ */
+export function useCurrentUserId(): number {
+  const { user } = useAuth();
+  return user?.id ?? 0;
+}
