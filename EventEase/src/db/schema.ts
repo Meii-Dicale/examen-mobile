@@ -18,7 +18,7 @@ import { seedDemoData } from './seed';
 export const DATABASE_NAME = 'eventease.db';
 
 // Date courante au format ISO 8601 (ex. 2026-10-19T08:30:00.000Z), calculée par SQLite.
-const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))";
+export const NOW = "(strftime('%Y-%m-%dT%H:%M:%fZ', 'now'))";
 
 const MIGRATIONS: ((db: SQLiteDatabase) => Promise<void>)[] = [
   // Version 1 : les quatre tables, puis les données de démonstration.
