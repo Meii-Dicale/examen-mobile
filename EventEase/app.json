@@ -39,7 +39,13 @@
       "expo-web-browser",
       "expo-sqlite",
       "expo-secure-store",
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      [
+        "expo-calendar",
+        {
+          "calendarPermission": "EventEase ajoute les événements auxquels tu participes à ton agenda, avec un rappel."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

@@ -114,7 +114,23 @@ export const fr = {
   },
   calendar: {
     title: 'Calendrier',
-    comingSoon: 'Le calendrier arrive dans une prochaine étape.',
+    subtitle: 'Touche un jour pour voir ses événements.',
+    // « mardi 20 octobre » est construit par formatDay.
+    dayEvents: (day: string) => `Événements du ${day}`,
+    emptyDay: 'Aucun événement ce jour-là.',
+    today: "Aujourd'hui",
+  },
+  agenda: {
+    add: 'Ajouter à mon agenda',
+    added: 'Dans ton agenda',
+    addedHint: "Il sera retiré de ton agenda si tu annules ta participation.",
+    proposeTitle: 'Ajouter à ton agenda ?',
+    proposeMessage: 'Un rappel te sera envoyé une heure avant.',
+    later: 'Plus tard',
+    deniedTitle: "Accès à l'agenda refusé",
+    deniedMessage: "Autorise EventEase à accéder à ton agenda dans les réglages du téléphone, puis réessaie.",
+    openSettings: 'Ouvrir les réglages',
+    error: "L'ajout à l'agenda a échoué, réessaie.",
   },
   profile: {
     title: 'Profil',

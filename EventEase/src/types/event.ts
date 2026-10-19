@@ -17,6 +17,8 @@ export type Event = {
   participantCount: number;
   /** true si l'utilisateur connecté participe. */
   isParticipating: boolean;
+  /** Id de l'événement ajouté à l'agenda du téléphone (expo-calendar), null sinon. */
+  deviceCalendarEventId: string | null;
 };
 
 /** Ce que remplit le formulaire de création / modification. */

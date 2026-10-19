@@ -32,8 +32,9 @@ type EventRow = {
   created_at: string;
   updated_at: string;
   participant_count: number;
-  /** SQLite n'a pas de booléen : EXISTS renvoie 0 ou 1. */
+  /** SQLite n'a pas de booléen : la comparaison renvoie 0 ou 1. */
   is_participating: 0 | 1;
+  device_calendar_event_id: string | null;
 };
 
 function toEvent(row: EventRow): Event {
@@ -51,6 +52,7 @@ function toEvent(row: EventRow): Event {
     updatedAt: row.updated_at,
     participantCount: row.participant_count,
     isParticipating: row.is_participating === 1,
+    deviceCalendarEventId: row.device_calendar_event_id,
   };
 }
 
@@ -58,15 +60,19 @@ function toEvent(row: EventRow): Event {
  * Requête de base, en une seule fois :
  * - jointure avec `users` pour afficher « Organisé par … » ;
  * - sous-requête COUNT pour le nombre de participants ;
- * - EXISTS pour savoir si l'utilisateur connecté (le « ? ») participe.
+ * - LEFT JOIN sur la participation de l'utilisateur connecté (le « ? ») : s'il
+ *   ne participe pas, la jointure ne trouve rien et `mp.user_id` vaut NULL.
+ *   On en tire « est-ce que je participe ? » et l'id de l'agenda du téléphone.
  * Une requête par écran, au lieu d'une requête par carte.
  */
 const SELECT_EVENTS = `
   SELECT e.*, u.name AS creator_name,
     (SELECT COUNT(*) FROM participations p WHERE p.event_id = e.id) AS participant_count,
-    EXISTS (SELECT 1 FROM participations p WHERE p.event_id = e.id AND p.user_id = ?) AS is_participating
+    mp.user_id IS NOT NULL AS is_participating,
+    mp.device_calendar_event_id
   FROM events e
   JOIN users u ON u.id = e.created_by
+  LEFT JOIN participations mp ON mp.event_id = e.id AND mp.user_id = ?
 `;
 
 /**
