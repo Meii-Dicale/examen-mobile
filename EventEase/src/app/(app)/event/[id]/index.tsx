@@ -19,7 +19,7 @@ import { useTheme } from '@/context/ThemeContext';
 import { useEvent } from '@/hooks/useEvent';
 import { useEventActions } from '@/hooks/useEventActions';
 import { fr } from '@/i18n/fr';
-import { CalendarPermissionError, isDeviceCalendarAvailable } from '@/services/deviceCalendar';
+import { CalendarPermissionError } from '@/services/deviceCalendar';
 import type { Event } from '@/types/event';
 import { spacing, typography } from '@/theme/tokens';
 import { formatEventDate, isPast } from '@/utils/date';
@@ -74,7 +74,7 @@ export default function EventDetail() {
       setToggling(false);
     }
     // Juste après « Je participe » sur un événement à venir : on propose l'agenda.
-    if (joining && !isPast(event.date) && isDeviceCalendarAvailable) {
+    if (joining && !isPast(event.date)) {
       Alert.alert(fr.agenda.proposeTitle, fr.agenda.proposeMessage, [
         { text: fr.agenda.later, style: 'cancel' },
         { text: fr.agenda.add, onPress: () => handleAddToAgenda(event) },

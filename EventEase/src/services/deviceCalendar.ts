@@ -3,14 +3,13 @@
  * qui ne fait qu'AFFICHER un calendrier dans l'app. Ici, on écrit dans l'app
  * Calendrier du système (iOS) ou Google Agenda (Android).
  *
- * Limite : expo-calendar contient du code natif absent d'Expo Go (SDK 57). Dans Expo Go,
- * le module est remplacé par une version vide qui lève une erreur : on teste donc
- * `isDeviceCalendarAvailable` avant d'afficher le bouton. Il faut un « development build »
- * (`npx expo run:ios|android` ou `eas build --profile development`) pour l'utiliser.
+ * Pourquoi `expo-calendar/legacy` ? En SDK 57, expo-calendar propose une nouvelle API
+ * orientée objet, mais elle n'est pas incluse dans Expo Go. L'API « legacy » (fonctions
+ * `…Async`) est toujours documentée, maintenue et incluse dans Expo Go : on peut donc
+ * tester sur le téléphone sans development build.
  */
 
-import { isRunningInExpoGo } from 'expo';
-import * as Calendar from 'expo-calendar';
+import * as Calendar from 'expo-calendar/legacy';
 import { Platform } from 'react-native';
 
 import type { Event } from '@/types/event';
@@ -19,8 +18,6 @@ import type { Event } from '@/types/event';
 const DEFAULT_DURATION_MS = 2 * 60 * 60 * 1000;
 /** Rappel 1 h avant (en minutes, négatif = avant le début). */
 const REMINDER_OFFSET_MINUTES = -60;
-
-export const isDeviceCalendarAvailable = !isRunningInExpoGo() && Platform.OS !== 'web';
 
 /** L'utilisateur a refusé l'accès à l'agenda. */
 export class CalendarPermissionError extends Error {
@@ -32,32 +29,35 @@ export class CalendarPermissionError extends Error {
 
 /** Demande la permission (la fenêtre système ne s'affiche qu'une fois). */
 async function ensurePermission(): Promise<void> {
-  const { granted } = await Calendar.requestCalendarPermissions();
+  const { granted } = await Calendar.requestCalendarPermissionsAsync();
   if (!granted) throw new CalendarPermissionError();
 }
 
 /**
- * Calendrier dans lequel écrire :
+ * Id du calendrier dans lequel écrire :
  * - iOS a un calendrier par défaut, choisi par l'utilisateur dans les réglages ;
  * - Android n'en a pas : on prend le calendrier principal d'un compte, modifiable.
  */
-async function getWritableCalendar(): Promise<Calendar.ExpoCalendar> {
-  if (Platform.OS === 'ios') return Calendar.getDefaultCalendarSync();
+async function getWritableCalendarId(): Promise<string> {
+  if (Platform.OS === 'ios') {
+    const calendar = await Calendar.getDefaultCalendarAsync();
+    return calendar.id;
+  }
 
-  const calendars = await Calendar.getCalendars();
+  const calendars = await Calendar.getCalendarsAsync(Calendar.EntityTypes.EVENT);
   const writable = calendars.filter((calendar) => calendar.allowsModifications);
   const calendar = writable.find((item) => item.isPrimary) ?? writable[0];
   if (!calendar) throw new Error('no-writable-calendar');
-  return calendar;
+  return calendar.id;
 }
 
 /** Ajoute l'événement à l'agenda et renvoie l'id créé par le système. */
 export async function addToDeviceCalendar(event: Event): Promise<string> {
   await ensurePermission();
-  const calendar = await getWritableCalendar();
+  const calendarId = await getWritableCalendarId();
   const startDate = new Date(event.date);
 
-  const created = await calendar.createEvent({
+  return Calendar.createEventAsync(calendarId, {
     title: event.title,
     startDate,
     endDate: new Date(startDate.getTime() + DEFAULT_DURATION_MS),
@@ -67,17 +67,15 @@ export async function addToDeviceCalendar(event: Event): Promise<string> {
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     alarms: [{ relativeOffset: REMINDER_OFFSET_MINUTES }],
   });
-  return created.id;
 }
 
 /**
- * Retire l'événement de l'agenda. Si l'utilisateur l'a déjà supprimé lui-même
- * dans son agenda, `get` échoue : ce n'est pas grave, le résultat voulu est atteint.
+ * Retire l'événement de l'agenda. S'il a déjà été supprimé à la main dans
+ * l'agenda, l'appel échoue : ce n'est pas grave, le résultat voulu est atteint.
  */
 export async function removeFromDeviceCalendar(deviceCalendarEventId: string): Promise<void> {
   try {
-    const event = await Calendar.ExpoCalendarEvent.get(deviceCalendarEventId);
-    await event.delete();
+    await Calendar.deleteEventAsync(deviceCalendarEventId);
   } catch {
     // Déjà supprimé, ou permission retirée entre-temps : on ignore.
   }

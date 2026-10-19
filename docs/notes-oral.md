@@ -74,8 +74,8 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - **`react-native-calendars`** : *affiche* un calendrier dans l'app (onglet Calendrier). Pur JavaScript, fonctionne dans Expo Go. Un point sous chaque jour qui a des événements (`markedDates`), et toucher un jour filtre la liste en dessous. Les données viennent du même hook `useEvents` que la liste : rien de nouveau en base.
 - **`expo-calendar`** : *écrit* dans l'agenda du système (Calendrier iOS, Google Agenda). Bouton « Ajouter à mon agenda » sur le détail, et proposition dans une `Alert` juste après « Je participe ».
 - **Pas de doublon** : l'id renvoyé par le système est enregistré dans `participations.device_calendar_event_id`. S'il existe, le bouton devient « Dans ton agenda », désactivé.
-- **Annuler sa participation** retire aussi l'événement de l'agenda (`ExpoCalendarEvent.get(id)` puis `delete()`). Si l'utilisateur l'a déjà supprimé lui-même, l'erreur est ignorée : le résultat voulu est atteint.
-- **iOS / Android** : iOS a un calendrier par défaut (`getDefaultCalendarSync`), Android non. On y prend le calendrier principal (`isPrimary`) modifiable (`allowsModifications`).
+- **Annuler sa participation** retire aussi l'événement de l'agenda (`deleteEventAsync(id)`). Si l'utilisateur l'a déjà supprimé lui-même, l'erreur est ignorée : le résultat voulu est atteint.
+- **iOS / Android** : iOS a un calendrier par défaut (`getDefaultCalendarAsync`), Android non. On y prend le calendrier principal (`isPrimary`) modifiable (`allowsModifications`).
 - **Rappel** : une alarme 1 h avant (`relativeOffset: -60`). Durée : 2 h par défaut, car on ne stocke que l'heure de début.
 - **Clé de jour en heure locale** (`toDayKey`) : `iso.slice(0, 10)` donnerait le jour en **UTC**. Un événement à 0 h 30 à Paris serait affiché la veille.
 - **Thème** : la librairie ne relit pas `theme` après le premier rendu. Une `key` qui change entre clair et sombre force React à recréer le composant.
@@ -204,10 +204,11 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 - *Cause* : le Fast Refresh a ré-exécuté le module, qui a tenté d'enregistrer une deuxième fois son composant natif. Ce n'est pas un bug du code.
 - *Correction* : recharger l'app (`r` dans Metro), ou `npx expo start -c` pour vider le cache.
 
-**`expo-calendar` absent d'Expo Go**
-- *Constat* : en lisant la doc du SDK 57 et le code du paquet, j'ai vu qu'Expo Go remplace le module par une version vide qui lève une erreur. Il faut un *development build*.
-- *Solution* : le service exporte `isDeviceCalendarAvailable` (basé sur `isRunningInExpoGo()` d'`expo`). Dans Expo Go, un texte explique la limite à la place du bouton. Le reste de l'app, dont l'onglet Calendrier, fonctionne normalement.
-- *Leçon* : vérifier la compatibilité Expo Go **avant** de choisir une librairie native.
+**La nouvelle API d'`expo-calendar` absente d'Expo Go**
+- *Constat* : en SDK 57, expo-calendar propose une nouvelle API orientée objet (`getDefaultCalendarSync()`, `calendar.createEvent()`). En lisant le code du paquet, j'ai vu que dans Expo Go elle est remplacée par une version vide qui lève une erreur.
+- *Recherche* : la doc indique que l'API « legacy » (`expo-calendar/legacy`, fonctions `…Async`) est **incluse dans Expo Go**, documentée et maintenue.
+- *Solution* : le service importe `expo-calendar/legacy`. On teste sur le téléphone sans *development build*. Le choix est isolé dans `services/deviceCalendar.ts` : passer à la nouvelle API ne toucherait que ce fichier.
+- *Leçon* : vérifier la compatibilité Expo Go **avant** de choisir une API native, et garder le code natif derrière un service.
 
 **Le mauvais projet ouvert dans Expo Go**
 - Sur le Wi-Fi de l'école, Expo Go ouvrait le serveur d'un camarade.
@@ -234,7 +235,7 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Comment sais-tu si je participe, pour chaque carte ? | Un `LEFT JOIN` sur ma participation, dans la même requête que la liste : une seule requête pour tout l'écran, pas une par carte (problème N+1). |
 | Quelle différence entre react-native-calendars et expo-calendar ? | La première *affiche* un calendrier dans l'app. La seconde *écrit* dans l'agenda du téléphone, avec une permission système. |
 | Comment évites-tu d'ajouter deux fois l'événement à l'agenda ? | L'id renvoyé par le système est enregistré dans `participations.device_calendar_event_id`. S'il est présent, le bouton est désactivé et l'action ne fait rien. |
-| Pourquoi l'ajout à l'agenda n'apparaît pas dans Expo Go ? | expo-calendar contient du code natif absent d'Expo Go (SDK 57). Je le détecte avec `isRunningInExpoGo()` et j'affiche une explication. Il fonctionne dans un *development build*. |
+| Pourquoi `expo-calendar/legacy` et pas la nouvelle API ? | La nouvelle API orientée objet n'est pas incluse dans Expo Go en SDK 57. La version legacy l'est, et elle est toujours documentée. Tout est dans un seul service : migrer ne toucherait qu'un fichier. |
 | Que se passe-t-il si j'appuie deux fois sur « Je participe » ? | La clé primaire composite interdit le doublon, et `INSERT OR IGNORE` ignore la seconde insertion sans erreur. Le bouton est aussi désactivé pendant l'enregistrement. |
 | Pourquoi « 3 personnes participent » et pas « participants » ? | C'est une formulation neutre, sans accord au genre, qui gère aussi le pluriel et le passé. |
 | Pourquoi des hooks personnalisés ? | Pour séparer la logique (chargement, erreurs) de l'affichage, et la réutiliser sur plusieurs écrans. |

@@ -131,7 +131,6 @@ export const fr = {
     deniedMessage: "Autorise EventEase à accéder à ton agenda dans les réglages du téléphone, puis réessaie.",
     openSettings: 'Ouvrir les réglages',
     error: "L'ajout à l'agenda a échoué, réessaie.",
-    unavailable: "L'ajout à l'agenda du téléphone n'est pas disponible dans Expo Go (il faut un development build).",
   },
   profile: {
     title: 'Profil',
