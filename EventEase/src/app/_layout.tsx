@@ -1,7 +1,7 @@
 /**
  * Layout racine : le premier composant affiché par Expo Router.
- * Il place les Providers (base de données, thème, puis session dans une branche
- * suivante), charge les polices et déclare la navigation en pile (Stack).
+ * Il place les Providers (base de données, thème, session), charge les polices
+ * et choisit les écrans accessibles selon que quelqu'un est connecté ou non.
  */
 
 import {
@@ -18,6 +18,7 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 
+import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { DATABASE_NAME, migrateDbIfNeeded } from '@/db/schema';
 
@@ -26,15 +27,16 @@ import { DATABASE_NAME, migrateDbIfNeeded } from '@/db/schema';
 SplashScreen.preventAutoHideAsync();
 
 /**
- * Les polices sont chargées ICI, sous <SQLiteProvider>, et pas dans RootLayout.
+ * Les polices et la session sont attendues ICI, sous <SQLiteProvider>, et pas dans RootLayout.
  * Raison : SQLiteProvider est mémoïsé (React.memo) et ne se re-rend que si ses
  * propres props changent (databaseName, onInit…), pas ses enfants. Si l'état
- * « polices chargées » vivait au-dessus de lui, la mise à jour ne descendrait
+ * « polices chargées » ou « session restaurée » vivait au-dessus de lui, la mise à jour ne descendrait
  * jamais jusqu'ici et l'app resterait bloquée sur le splash.
  */
 function RootStack() {
   // Ce composant est SOUS le ThemeProvider : il peut donc lire le thème.
   const { colors, isDark } = useTheme();
+  const { user, isLoading } = useAuth();
   const [fontsLoaded, fontError] = useFonts({
     Montserrat_400Regular,
     Montserrat_500Medium,
@@ -44,18 +46,33 @@ function RootStack() {
   });
   // En cas d'erreur de chargement, on affiche quand même l'app (avec la police système).
   const fontsReady = fontsLoaded || fontError != null;
+  // On attend aussi la session : sinon l'écran de connexion clignoterait
+  // une fraction de seconde avant d'afficher l'app d'une personne déjà connectée.
+  const ready = fontsReady && !isLoading;
 
   useEffect(() => {
-    if (fontsReady) SplashScreen.hideAsync();
-  }, [fontsReady]);
+    if (ready) SplashScreen.hideAsync();
+  }, [ready]);
 
-  if (!fontsReady) return null;
+  if (!ready) return null;
 
   return (
     <>
       {/* Heure et batterie en clair sur fond sombre, et inversement. */}
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }} />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.bg } }}>
+        {/*
+          Stack.Protected : un groupe n'existe que si sa condition (guard) est vraie.
+          Quand `user` change (connexion, déconnexion), Expo Router bascule tout seul
+          vers le groupe devenu accessible : aucun router.replace dans les écrans.
+        */}
+        <Stack.Protected guard={!user}>
+          <Stack.Screen name="(auth)" />
+        </Stack.Protected>
+        <Stack.Protected guard={!!user}>
+          <Stack.Screen name="(app)" />
+        </Stack.Protected>
+      </Stack>
     </>
   );
 }
@@ -67,7 +84,10 @@ export default function RootLayout() {
     // Pendant ce temps, le splash natif reste affiché.
     <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
       <ThemeProvider>
-        <RootStack />
+        {/* AuthProvider lit la base : il doit être sous SQLiteProvider. */}
+        <AuthProvider>
+          <RootStack />
+        </AuthProvider>
       </ThemeProvider>
     </SQLiteProvider>
   );
