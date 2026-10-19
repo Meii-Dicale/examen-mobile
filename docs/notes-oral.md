@@ -56,8 +56,10 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - L'id passe dans l'URL (`/event/[id]`). `useLocalSearchParams` le renvoie en **chaîne**, d'où le `Number(id)`.
 
 **Participation** (feat/participation)
-- Une seule requête par écran : le nombre de participants (`COUNT`) et « est-ce que je participe ? » (`EXISTS`) sont des sous-requêtes. On évite le **problème N+1** (une requête par carte).
-- SQLite n'a pas de booléen : `EXISTS` renvoie 0 ou 1, converti en `true`/`false` dans `toEvent`.
+- Une seule requête par écran : le nombre de participants est une sous-requête `COUNT`, et « est-ce que je participe ? » vient d'un **`LEFT JOIN`** sur ma propre participation. On évite le **problème N+1** (une requête par carte).
+- `LEFT JOIN participations mp ON mp.event_id = e.id AND mp.user_id = ?` : si je ne participe pas, la jointure ne trouve rien et `mp.user_id` vaut `NULL`. `mp.user_id IS NOT NULL` donne donc 0 ou 1 (SQLite n'a pas de booléen), converti en `true`/`false` dans `toEvent`. La jointure fournit en plus `device_calendar_event_id` (agenda du téléphone).
+- Pas de lignes en double : la clé primaire `(user_id, event_id)` garantit au plus une participation par personne. Vérifié avec sqlite3.
+- *Évolution* : la première version utilisait `EXISTS (…)`. Je suis passé·e au `LEFT JOIN` quand il a fallu lire aussi une colonne de la participation.
 - La clé primaire `(user_id, event_id)` interdit les doublons. `INSERT OR IGNORE` rend un double appui sans effet.
 - On peut aussi indiquer sa participation à un événement **passé** (« J'y ai participé »), ce qui ouvrira l'ajout de photos.
 - Après un appui, on **relit** l'événement en base plutôt que de modifier l'état à la main : le bouton et le compteur restent forcément cohérents avec la base.
@@ -67,6 +69,17 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - Le hook renvoie donc 0, qui ne correspond à aucun compte (AUTOINCREMENT commence à 1). Même une écriture serait refusée par la clé étrangère : c'est vérifié avec sqlite3.
 
 **Profil : onglets « À venir / Passés »** avec un composant `SegmentedControl` générique (`<T extends string>`) : TypeScript vérifie que les valeurs des options et de `onChange` sont les mêmes. Il est accessible (`accessibilityRole="tablist"` / `"tab"` et `accessibilityState.selected`) : VoiceOver annonce « onglet, sélectionné ». Le filtrage se fait en mémoire, sur la liste déjà chargée : pas de nouvelle requête au changement d'onglet.
+
+**Calendrier** (feat/calendar) — deux librairies différentes, à ne pas confondre
+- **`react-native-calendars`** : *affiche* un calendrier dans l'app (onglet Calendrier). Pur JavaScript, fonctionne dans Expo Go. Un point sous chaque jour qui a des événements (`markedDates`), et toucher un jour filtre la liste en dessous. Les données viennent du même hook `useEvents` que la liste : rien de nouveau en base.
+- **`expo-calendar`** : *écrit* dans l'agenda du système (Calendrier iOS, Google Agenda). Bouton « Ajouter à mon agenda » sur le détail, et proposition dans une `Alert` juste après « Je participe ».
+- **Pas de doublon** : l'id renvoyé par le système est enregistré dans `participations.device_calendar_event_id`. S'il existe, le bouton devient « Dans ton agenda », désactivé.
+- **Annuler sa participation** retire aussi l'événement de l'agenda (`ExpoCalendarEvent.get(id)` puis `delete()`). Si l'utilisateur l'a déjà supprimé lui-même, l'erreur est ignorée : le résultat voulu est atteint.
+- **iOS / Android** : iOS a un calendrier par défaut (`getDefaultCalendarSync`), Android non. On y prend le calendrier principal (`isPrimary`) modifiable (`allowsModifications`).
+- **Rappel** : une alarme 1 h avant (`relativeOffset: -60`). Durée : 2 h par défaut, car on ne stocke que l'heure de début.
+- **Clé de jour en heure locale** (`toDayKey`) : `iso.slice(0, 10)` donnerait le jour en **UTC**. Un événement à 0 h 30 à Paris serait affiché la veille.
+- **Thème** : la librairie ne relit pas `theme` après le premier rendu. Une `key` qui change entre clair et sombre force React à recréer le composant.
+- **Limites assumées** : modifier un événement ne met pas à jour l'agenda, et une suppression par le créateur ne le nettoie pas chez les participant·es. Sans serveur, on ne peut pas prévenir les autres téléphones.
 
 **Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
 
@@ -185,6 +198,17 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 - *Correction* : j'ai repris le modèle de mon Pokédex. La fonction async est déclarée **dans** l'effet, et une `reloadKey` permet de recharger.
 - Un drapeau `cancelled` évite d'écrire dans l'état d'un écran déjà quitté.
 
+**« Tried to register two views with the same name RNDateTimePicker »**
+- *Symptôme* : erreur rouge après avoir changé de branche (ou installé une librairie) pendant que Metro tournait.
+- *Démarche* : la pile d'appels passait par `HMRClient injectUpdate`, donc par le **Fast Refresh**. J'ai vérifié avec `npm ls` qu'une seule copie de la librairie était installée.
+- *Cause* : le Fast Refresh a ré-exécuté le module, qui a tenté d'enregistrer une deuxième fois son composant natif. Ce n'est pas un bug du code.
+- *Correction* : recharger l'app (`r` dans Metro), ou `npx expo start -c` pour vider le cache.
+
+**`expo-calendar` absent d'Expo Go**
+- *Constat* : en lisant la doc du SDK 57 et le code du paquet, j'ai vu qu'Expo Go remplace le module par une version vide qui lève une erreur. Il faut un *development build*.
+- *Solution* : le service exporte `isDeviceCalendarAvailable` (basé sur `isRunningInExpoGo()` d'`expo`). Dans Expo Go, un texte explique la limite à la place du bouton. Le reste de l'app, dont l'onglet Calendrier, fonctionne normalement.
+- *Leçon* : vérifier la compatibilité Expo Go **avant** de choisir une librairie native.
+
 **Le mauvais projet ouvert dans Expo Go**
 - Sur le Wi-Fi de l'école, Expo Go ouvrait le serveur d'un camarade.
 - *Solution* : le partage de connexion du téléphone, qui crée un réseau isolé.
@@ -198,7 +222,7 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Que se passe-t-il si on supprime un événement ? | Confirmation par `Alert`. Ensuite, `ON DELETE CASCADE` supprime ses participations et ses photos. |
 | Comment empêches-tu un autre membre de modifier mon événement ? | Deux niveaux : les boutons ne s'affichent que pour le créateur, et la requête SQL contient `AND created_by = ?`. Même avec un lien direct, la base refuse (0 ligne modifiée). |
 | Où sont stockées les données ? | Dans un fichier SQLite sur le téléphone (`eventease.db`). Le thème est dans AsyncStorage, la session dans SecureStore. |
-| Que se passe-t-il si l'utilisateur refuse une permission ? | La fonctionnalité concernée est masquée ou expliquée, et le reste de l'app fonctionne. *(à compléter avec les bonus)* |
+| Que se passe-t-il si l'utilisateur refuse une permission ? | La fonctionnalité concernée est masquée ou expliquée, et le reste de l'app fonctionne. Agenda : une `Alert` explique le refus et propose « Ouvrir les réglages » (`Linking.openSettings()`), car le système ne redemande pas une permission refusée. *(à compléter : localisation)* |
 | Comment l'app sait que je suis connecté·e après un redémarrage ? | L'id est dans SecureStore. `AuthContext` le relit au démarrage et recharge l'utilisateur depuis SQLite. |
 | Pourquoi un Context pour l'authentification ? | Plusieurs écrans et le layout ont besoin de `user`. Le Context évite de le passer en props partout, et `useMemo` évite des rendus inutiles. |
 | Où est faite la validation ? | Dans `utils/validation.ts` : des fonctions pures, testables sans React. L'écran valide d'abord localement, puis interroge la base. |
@@ -207,7 +231,10 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Pourquoi un sélecteur de date différent sur iOS et Android ? | Les composants natifs diffèrent. iOS a un sélecteur compact date + heure, Android seulement des boîtes de dialogue séparées, que j'ouvre avec `DateTimePickerAndroid.open`. Le formulaire reçoit toujours une date ISO. |
 | Comment tries-tu les événements par date ? | Les dates sont en ISO 8601, donc l'ordre alphabétique est l'ordre chronologique : un simple `ORDER BY date`, avec un index sur la colonne. |
 | Pourquoi une confirmation avant de supprimer ? | La suppression est définitive et entraîne celle des participations (CASCADE). L'`Alert` native évite une erreur sur un appui accidentel. |
-| Comment sais-tu si je participe, pour chaque carte ? | Une sous-requête `EXISTS` dans la même requête que la liste : une seule requête pour tout l'écran, pas une par carte (problème N+1). |
+| Comment sais-tu si je participe, pour chaque carte ? | Un `LEFT JOIN` sur ma participation, dans la même requête que la liste : une seule requête pour tout l'écran, pas une par carte (problème N+1). |
+| Quelle différence entre react-native-calendars et expo-calendar ? | La première *affiche* un calendrier dans l'app. La seconde *écrit* dans l'agenda du téléphone, avec une permission système. |
+| Comment évites-tu d'ajouter deux fois l'événement à l'agenda ? | L'id renvoyé par le système est enregistré dans `participations.device_calendar_event_id`. S'il est présent, le bouton est désactivé et l'action ne fait rien. |
+| Pourquoi l'ajout à l'agenda n'apparaît pas dans Expo Go ? | expo-calendar contient du code natif absent d'Expo Go (SDK 57). Je le détecte avec `isRunningInExpoGo()` et j'affiche une explication. Il fonctionne dans un *development build*. |
 | Que se passe-t-il si j'appuie deux fois sur « Je participe » ? | La clé primaire composite interdit le doublon, et `INSERT OR IGNORE` ignore la seconde insertion sans erreur. Le bouton est aussi désactivé pendant l'enregistrement. |
 | Pourquoi « 3 personnes participent » et pas « participants » ? | C'est une formulation neutre, sans accord au genre, qui gère aussi le pluriel et le passé. |
 | Pourquoi des hooks personnalisés ? | Pour séparer la logique (chargement, erreurs) de l'affichage, et la réutiliser sur plusieurs écrans. |

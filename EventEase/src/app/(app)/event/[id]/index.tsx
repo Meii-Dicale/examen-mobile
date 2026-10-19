@@ -7,10 +7,11 @@ import Feather from '@expo/vector-icons/Feather';
 import { router, useLocalSearchParams } from 'expo-router';
 import type { ComponentProps } from 'react';
 import { useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { Alert, Linking, StyleSheet, Text, View } from 'react-native';
 
 import { EmptyState } from '@/components/common/EmptyState';
 import { LoadState } from '@/components/common/LoadState';
+import { AgendaButton } from '@/components/events/AgendaButton';
 import { ParticipationButton } from '@/components/events/ParticipationButton';
 import { Button, Card, Screen } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
@@ -18,6 +19,8 @@ import { useTheme } from '@/context/ThemeContext';
 import { useEvent } from '@/hooks/useEvent';
 import { useEventActions } from '@/hooks/useEventActions';
 import { fr } from '@/i18n/fr';
+import { CalendarPermissionError, isDeviceCalendarAvailable } from '@/services/deviceCalendar';
+import type { Event } from '@/types/event';
 import { spacing, typography } from '@/theme/tokens';
 import { formatEventDate, isPast } from '@/utils/date';
 
@@ -29,23 +32,53 @@ export default function EventDetail() {
   const eventId = Number(id);
   const { user } = useAuth();
   const { data: event, loading, error, reload } = useEvent(eventId);
-  const { remove, toggleParticipation } = useEventActions();
+  const { remove, toggleParticipation, addToAgenda } = useEventActions();
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
+  const [addingToAgenda, setAddingToAgenda] = useState(false);
 
   const isMine = event != null && event.createdBy === user?.id;
 
+  const handleAddToAgenda = async (target: Event) => {
+    setAddingToAgenda(true);
+    try {
+      await addToAgenda(target);
+      reload();
+    } catch (err) {
+      if (err instanceof CalendarPermissionError) {
+        // Refus : l'app continue de fonctionner, on explique seulement comment changer d'avis.
+        Alert.alert(fr.agenda.deniedTitle, fr.agenda.deniedMessage, [
+          { text: fr.common.cancel, style: 'cancel' },
+          { text: fr.agenda.openSettings, onPress: () => Linking.openSettings() },
+        ]);
+      } else {
+        Alert.alert(fr.agenda.error);
+      }
+    } finally {
+      setAddingToAgenda(false);
+    }
+  };
+
   const handleToggle = async () => {
     if (!event) return;
+    const joining = !event.isParticipating;
     setToggling(true);
     try {
-      await toggleParticipation(event.id, event.isParticipating);
+      await toggleParticipation(event);
       // On relit l'événement : le bouton ET le compteur se mettent à jour ensemble.
       reload();
     } catch {
       Alert.alert(fr.participation.error);
+      return;
     } finally {
       setToggling(false);
+    }
+    // Juste après « Je participe » sur un événement à venir : on propose l'agenda.
+    if (joining && !isPast(event.date) && isDeviceCalendarAvailable) {
+      Alert.alert(fr.agenda.proposeTitle, fr.agenda.proposeMessage, [
+        { text: fr.agenda.later, style: 'cancel' },
+        { text: fr.agenda.add, onPress: () => handleAddToAgenda(event) },
+      ]);
     }
   };
 
@@ -91,6 +124,14 @@ export default function EventDetail() {
               onPress={handleToggle}
               loading={toggling}
             />
+            {/* L'agenda n'a de sens que pour un événement à venir auquel on participe. */}
+            {event.isParticipating && !isPast(event.date) ? (
+              <AgendaButton
+                added={event.deviceCalendarEventId != null}
+                onPress={() => handleAddToAgenda(event)}
+                loading={addingToAgenda}
+              />
+            ) : null}
 
             <Card>
               <Text style={[typography.section, { color: colors.muted }]}>{t.description}</Text>

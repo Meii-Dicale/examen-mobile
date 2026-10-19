@@ -30,3 +30,21 @@ export function defaultEventDate(now: Date = new Date()): string {
   date.setHours(18, 0, 0, 0);
   return date.toISOString();
 }
+
+/**
+ * Clé « AAAA-MM-JJ » du jour LOCAL de la date (format attendu par react-native-calendars).
+ * Attention : `iso.slice(0, 10)` donnerait le jour en UTC. Un événement à 0 h 30 à Paris
+ * est encore la veille en UTC : il apparaîtrait sur le mauvais jour.
+ */
+export function toDayKey(iso: string): string {
+  const date = new Date(iso);
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}
+
+/** Inverse de toDayKey : « 2026-10-20 » → ISO de ce jour à midi (heure locale), pour formatDay. */
+export function dayKeyToIso(dayKey: string): string {
+  const [year, month, day] = dayKey.split('-').map(Number);
+  return new Date(year, month - 1, day, 12).toISOString();
+}
