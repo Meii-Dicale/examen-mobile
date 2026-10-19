@@ -39,5 +39,10 @@ export const fr = {
     cardTitle: 'Pique-nique de rentrée',
     cardBody: 'Samedi 24 octobre · Parc de la Tête d’Or',
     weatherSample: '18 °C · Ensoleillé',
+    database: 'Base de données',
+    dbCounts: (users: number, events: number, participations: number) =>
+      `${users} utilisateurs · ${events} événements · ${participations} participations`,
+    dbDemo: 'Compte démo : demo@eventease.fr / demo1234',
+    dbError: 'La base de données est illisible.',
   },
 };

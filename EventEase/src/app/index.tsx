@@ -4,10 +4,11 @@
  * Il sera remplacé par l'écran de connexion dans la branche feat/auth.
  */
 
-import { StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 import { Button, Card, Input, Screen } from '@/components/ui';
 import { useTheme } from '@/context/ThemeContext';
+import { useDatabaseSummary } from '@/hooks/useDatabaseSummary';
 import { fr } from '@/i18n/fr';
 import { radius, spacing, typography } from '@/theme/tokens';
 
@@ -15,6 +16,7 @@ const t = fr.showcase;
 
 export default function Showcase() {
   const { colors, isDark, toggleScheme } = useTheme();
+  const summary = useDatabaseSummary();
 
   return (
     <Screen scroll>
@@ -54,6 +56,22 @@ export default function Showcase() {
         <View style={[styles.accent, { backgroundColor: colors.accent }]}>
           <Text style={[typography.label, { color: colors.onAccent }]}>{t.weatherSample}</Text>
         </View>
+      </Card>
+
+      <Text style={[typography.section, { color: colors.muted }]}>{t.database}</Text>
+      <Card>
+        {summary.loading ? (
+          <ActivityIndicator color={colors.primary} />
+        ) : summary.error || !summary.data ? (
+          <Text style={[typography.body, { color: colors.danger }]}>{t.dbError}</Text>
+        ) : (
+          <>
+            <Text style={[typography.body, { color: colors.text }]}>
+              {t.dbCounts(summary.data.users, summary.data.events, summary.data.participations)}
+            </Text>
+            <Text style={[typography.caption, { color: colors.muted }]}>{t.dbDemo}</Text>
+          </>
+        )}
       </Card>
     </Screen>
   );
