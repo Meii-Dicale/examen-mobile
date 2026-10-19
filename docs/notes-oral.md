@@ -42,6 +42,21 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - L'**écran** se contente d'afficher.
 - Intérêt : chaque couche a une seule responsabilité, et on peut changer la base sans toucher aux écrans.
 
+**Le hook générique `useFocusQuery`** (feat/events-crud)
+- `useEvents` et `useEvent` ne font qu'appeler `useFocusQuery(requête)` : la logique chargement / erreur / annulation n'est écrite qu'**une fois**.
+- Il utilise `useFocusEffect` et non `useEffect`. La requête est relancée **chaque fois que l'écran revient au premier plan** : après une création, le retour sur la liste suffit à la rafraîchir, sans système d'événements ni état global.
+- Piège à connaître : la requête passée doit être **stable** (fonction du module ou `useCallback`). Sinon elle change à chaque rendu et la requête tourne en boucle.
+- `useEventActions` fournit `create`, `update` et `remove` avec l'utilisateur connecté déjà injecté : un écran ne passe jamais de `userId`.
+
+**Un formulaire partagé (`EventForm`)** : la création et la modification utilisent le même composant. Seuls les valeurs de départ, le libellé du bouton et l'action `onSubmit` changent. On n'écrit pas deux fois la même validation.
+
+**Navigation des événements**
+- `(app)` est une Stack contenant les onglets, avec le détail et la modification « poussés » par-dessus.
+- La création s'ouvre en **modale** (`presentation: 'modal'`) : c'est une tâche courte qu'on ferme pour revenir où on était.
+- L'id passe dans l'URL (`/event/[id]`). `useLocalSearchParams` le renvoie en **chaîne**, d'où le `Number(id)`.
+
+**Pourquoi `SectionList` et pas `.map()` ?** Elle ne rend que les cartes visibles (virtualisation), gère les sections « À venir / Passés » et le « tirer pour rafraîchir ».
+
 **Pourquoi un Context pour le thème ?**
 Sans lui, il faudrait passer `colors` en props à chaque composant (« prop drilling »). Avec `ThemeProvider` + `useTheme()`, n'importe quel composant y accède directement.
 
@@ -93,6 +108,12 @@ Aucune valeur magique (`16`, `'#7A2E8E'`) dans les écrans : changer un espaceme
 **Messages d'erreur de connexion** : le même message, « E-mail ou mot de passe incorrect », pour un e-mail inconnu et pour un mauvais mot de passe. Sinon, l'écran révèlerait quels e-mails ont un compte (énumération des comptes).
 
 **E-mail déjà pris** : c'est la contrainte `UNIQUE COLLATE NOCASE` de la base qui refuse le doublon. On transforme l'erreur SQL en `AuthError('email-taken')`. C'est plus sûr qu'un `SELECT` avant l'`INSERT`, car la base est la seule source de vérité.
+
+**Seul le créateur peut modifier ou supprimer — vérifié deux fois**
+1. Dans l'interface, les boutons ne s'affichent que si `event.createdBy === user.id`.
+2. **Dans la requête SQL** : `UPDATE … WHERE id = ? AND created_by = ?`. Si ce n'est pas le créateur, `changes` vaut 0 et le service lève une erreur.
+- Pourquoi les deux ? Masquer un bouton n'est pas une sécurité : un lien direct vers `/event/3/edit` contournerait l'interface. C'est le principe « ne jamais faire confiance au client ». Sur un vrai back-end, cette vérification serait côté serveur.
+- Testé avec sqlite3 : une modification par Camille d'un événement d'Alex donne `changes = 0`.
 
 **Les secrets** : la clé OpenWeather est dans `.env`, exclu par le `.gitignore` : elle n'est jamais commitée. La checklist de chaque PR le vérifie.
 
@@ -160,12 +181,16 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Question | Réponse |
 |---|---|
 | Que se passe-t-il si on supprime un événement ? | Confirmation par `Alert`. Ensuite, `ON DELETE CASCADE` supprime ses participations et ses photos. |
-| Comment empêches-tu un autre membre de modifier mon événement ? | Les boutons ne s'affichent que si `created_by` est l'utilisateur connecté. *(à compléter avec feat/events-crud)* |
+| Comment empêches-tu un autre membre de modifier mon événement ? | Deux niveaux : les boutons ne s'affichent que pour le créateur, et la requête SQL contient `AND created_by = ?`. Même avec un lien direct, la base refuse (0 ligne modifiée). |
 | Où sont stockées les données ? | Dans un fichier SQLite sur le téléphone (`eventease.db`). Le thème est dans AsyncStorage, la session dans SecureStore. |
 | Que se passe-t-il si l'utilisateur refuse une permission ? | La fonctionnalité concernée est masquée ou expliquée, et le reste de l'app fonctionne. *(à compléter avec les bonus)* |
 | Comment l'app sait que je suis connecté·e après un redémarrage ? | L'id est dans SecureStore. `AuthContext` le relit au démarrage et recharge l'utilisateur depuis SQLite. |
 | Pourquoi un Context pour l'authentification ? | Plusieurs écrans et le layout ont besoin de `user`. Le Context évite de le passer en props partout, et `useMemo` évite des rendus inutiles. |
 | Où est faite la validation ? | Dans `utils/validation.ts` : des fonctions pures, testables sans React. L'écran valide d'abord localement, puis interroge la base. |
 | Pourquoi la redirection n'est pas dans l'écran de connexion ? | Avec `Stack.Protected`, c'est l'état `user` qui décide des écrans accessibles. C'est déclaratif, et il n'y a qu'un seul endroit à vérifier. |
+| Comment la liste se met à jour après une création ? | Le hook charge dans `useFocusEffect` : quand la modale se ferme, la liste reprend le focus et relance la requête. |
+| Pourquoi un sélecteur de date différent sur iOS et Android ? | Les composants natifs diffèrent. iOS a un sélecteur compact date + heure, Android seulement des boîtes de dialogue séparées, que j'ouvre avec `DateTimePickerAndroid.open`. Le formulaire reçoit toujours une date ISO. |
+| Comment tries-tu les événements par date ? | Les dates sont en ISO 8601, donc l'ordre alphabétique est l'ordre chronologique : un simple `ORDER BY date`, avec un index sur la colonne. |
+| Pourquoi une confirmation avant de supprimer ? | La suppression est définitive et entraîne celle des participations (CASCADE). L'`Alert` native évite une erreur sur un appui accidentel. |
 | Pourquoi des hooks personnalisés ? | Pour séparer la logique (chargement, erreurs) de l'affichage, et la réutiliser sur plusieurs écrans. |
 | `useEffect` : à quoi sert la fonction renvoyée ? | C'est le nettoyage : elle s'exécute quand l'écran est démonté ou avant le prochain effet (annuler un minuteur, ignorer une requête en cours). |
