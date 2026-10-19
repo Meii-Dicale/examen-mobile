@@ -29,7 +29,7 @@ export default function EditEvent() {
           isNew={false}
           submitLabel={fr.common.save}
           onSubmit={async (input) => {
-            await update(eventId, input);
+            await update(event, input);
             router.back();
           }}
           onCancel={() => router.back()}

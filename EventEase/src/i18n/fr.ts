@@ -132,6 +132,11 @@ export const fr = {
     openSettings: 'Ouvrir les réglages',
     error: "L'ajout à l'agenda a échoué, réessaie.",
   },
+  location: {
+    // « 2,3 km » est construit par formatDistance.
+    distance: (distance: string) => `à ${distance}`,
+    distanceFromYou: (distance: string) => `À ${distance} de toi`,
+  },
   profile: {
     title: 'Profil',
     memberSince: (date: string) => `Membre depuis le ${date}`,

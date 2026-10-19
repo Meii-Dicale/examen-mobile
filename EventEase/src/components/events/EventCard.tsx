@@ -2,11 +2,13 @@ import Feather from '@expo/vector-icons/Feather';
 import { StyleSheet, Text, View } from 'react-native';
 
 import { Card } from '@/components/ui';
+import { useUserPosition } from '@/context/LocationContext';
 import { useTheme } from '@/context/ThemeContext';
 import { fr } from '@/i18n/fr';
 import type { Event } from '@/types/event';
 import { radius, spacing, typography } from '@/theme/tokens';
 import { formatEventDate, isPast } from '@/utils/date';
+import { distanceKm, formatDistance } from '@/utils/distance';
 
 type Props = {
   event: Event;
@@ -15,11 +17,14 @@ type Props = {
   onPress: () => void;
 };
 
-/** Carte d'un événement dans la liste : date, titre, description, lieu, participants. */
+/** Carte d'un événement dans la liste : date, titre, description, lieu, distance, participants. */
 export function EventCard({ event, isMine, onPress }: Props) {
   const { colors } = useTheme();
   const date = formatEventDate(event.date);
   const participants = fr.participation.count(event.participantCount, isPast(event.date));
+  // null si la position ou les coordonnées du lieu manquent : rien n'est affiché.
+  const km = distanceKm(useUserPosition(), event);
+  const distance = km != null ? fr.location.distance(formatDistance(km)) : null;
 
   return (
     <Card
@@ -29,6 +34,7 @@ export function EventCard({ event, isMine, onPress }: Props) {
         event.title,
         date,
         event.locationName,
+        distance,
         isMine ? fr.events.mine : null,
         event.isParticipating ? fr.participation.badge : null,
         participants,
@@ -55,6 +61,7 @@ export function EventCard({ event, isMine, onPress }: Props) {
           <Text numberOfLines={1} style={[typography.caption, styles.flex, { color: colors.muted }]}>
             {event.locationName}
           </Text>
+          {distance ? <Text style={[typography.caption, { color: colors.primary }]}>{distance}</Text> : null}
         </View>
       ) : null}
       <View style={styles.footer}>

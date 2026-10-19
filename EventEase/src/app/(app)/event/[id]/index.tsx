@@ -15,6 +15,7 @@ import { AgendaButton } from '@/components/events/AgendaButton';
 import { ParticipationButton } from '@/components/events/ParticipationButton';
 import { Button, Card, Screen } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
+import { useUserPosition } from '@/context/LocationContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useEvent } from '@/hooks/useEvent';
 import { useEventActions } from '@/hooks/useEventActions';
@@ -23,6 +24,7 @@ import { CalendarPermissionError } from '@/services/deviceCalendar';
 import type { Event } from '@/types/event';
 import { spacing, typography } from '@/theme/tokens';
 import { formatEventDate, isPast } from '@/utils/date';
+import { distanceKm, formatDistance } from '@/utils/distance';
 
 const t = fr.eventDetail;
 
@@ -31,6 +33,7 @@ export default function EventDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const eventId = Number(id);
   const { user } = useAuth();
+  const position = useUserPosition();
   const { data: event, loading, error, reload } = useEvent(eventId);
   const { remove, toggleParticipation, addToAgenda } = useEventActions();
   const [deleting, setDeleting] = useState(false);
@@ -38,6 +41,7 @@ export default function EventDetail() {
   const [addingToAgenda, setAddingToAgenda] = useState(false);
 
   const isMine = event != null && event.createdBy === user?.id;
+  const km = event ? distanceKm(position, event) : null;
 
   const handleAddToAgenda = async (target: Event) => {
     setAddingToAgenda(true);
@@ -114,6 +118,7 @@ export default function EventDetail() {
               </Text>
               <InfoRow icon="calendar" text={formatEventDate(event.date)} capitalize />
               {event.locationName ? <InfoRow icon="map-pin" text={event.locationName} /> : null}
+              {km != null ? <InfoRow icon="navigation" text={fr.location.distanceFromYou(formatDistance(km))} /> : null}
               <InfoRow icon="user" text={isMine ? fr.events.mine : fr.events.organisedBy(event.creatorName)} />
               <InfoRow icon="users" text={fr.participation.count(event.participantCount, isPast(event.date))} />
             </View>
