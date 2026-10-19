@@ -122,8 +122,10 @@ export const fr = {
     appearance: 'Apparence',
     account: 'Compte',
     participations: 'Mes participations',
-    participationsEmpty: "Tu ne participes encore à aucun événement. Ouvre un événement et appuie sur « Je participe ».",
-    stats: (upcoming: number, past: number) => `${upcoming} à venir · ${past} passé${past > 1 ? 's' : ''}`,
+    upcomingTab: (count: number) => `À venir · ${count}`,
+    pastTab: (count: number) => `Passés · ${count}`,
+    emptyUpcoming: 'Aucune participation à venir. Ouvre un événement et appuie sur « Je participe ».',
+    emptyPast: "Tu n'as encore participé à aucun événement passé.",
     signOut: 'Se déconnecter',
   },
 };

@@ -8,7 +8,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { LoadState } from '@/components/common/LoadState';
 import { EventCard } from '@/components/events/EventCard';
-import { Button, Card, Screen } from '@/components/ui';
+import { Button, Card, Screen, SegmentedControl } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useMyParticipations } from '@/hooks/useEvents';
@@ -35,6 +35,8 @@ export default function ProfileTab() {
   // Les hooks sont appelés AVANT le `return null` ci-dessous : React exige qu'ils
   // soient appelés dans le même ordre à chaque rendu.
   const participations = useMyParticipations();
+  // Onglet affiché dans « Mes participations ».
+  const [period, setPeriod] = useState<'upcoming' | 'past'>('upcoming');
 
   // Cet écran n'existe que si quelqu'un est connecté (Stack.Protected) ;
   // le test rassure TypeScript, pour qui `user` peut être null.
@@ -47,7 +49,10 @@ export default function ProfileTab() {
   });
 
   const events = participations.data ?? [];
-  const upcomingCount = events.filter((event) => !isPast(event.date)).length;
+  const upcoming = events.filter((event) => !isPast(event.date));
+  // Passés : du plus récent au plus ancien (la requête trie par date croissante).
+  const past = events.filter((event) => isPast(event.date)).reverse();
+  const shown = period === 'upcoming' ? upcoming : past;
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -78,16 +83,17 @@ export default function ProfileTab() {
         </View>
       </Card>
 
-      <View style={styles.sectionHeader}>
-        <Text accessibilityRole="header" style={[typography.section, { color: colors.muted }]}>
-          {t.participations}
-        </Text>
-        {events.length > 0 ? (
-          <Text style={[typography.caption, { color: colors.muted }]}>
-            {t.stats(upcomingCount, events.length - upcomingCount)}
-          </Text>
-        ) : null}
-      </View>
+      <Text accessibilityRole="header" style={[typography.section, { color: colors.muted }]}>
+        {t.participations}
+      </Text>
+      <SegmentedControl
+        options={[
+          { value: 'upcoming', label: t.upcomingTab(upcoming.length) },
+          { value: 'past', label: t.pastTab(past.length) },
+        ]}
+        value={period}
+        onChange={setPeriod}
+      />
       <LoadState
         loading={participations.loading}
         error={participations.error}
@@ -95,11 +101,13 @@ export default function ProfileTab() {
         onRetry={participations.reload}
         errorTitle={fr.events.loadError}
       >
-        {events.length === 0 ? (
-          <Text style={[typography.body, { color: colors.muted }]}>{t.participationsEmpty}</Text>
+        {shown.length === 0 ? (
+          <Text style={[typography.body, { color: colors.muted }]}>
+            {period === 'upcoming' ? t.emptyUpcoming : t.emptyPast}
+          </Text>
         ) : (
           // Liste courte : un simple .map() suffit ici (pas besoin de virtualisation).
-          events.map((event) => (
+          shown.map((event) => (
             <EventCard
               key={event.id}
               event={event}
@@ -134,5 +142,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   identityText: { flex: 1, gap: 2 },
-  sectionHeader: { flexDirection: 'row', alignItems: 'baseline', justifyContent: 'space-between' },
 });

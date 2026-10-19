@@ -66,6 +66,8 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - À la déconnexion, `user` passe à `null` un instant **avant** que `Stack.Protected` retire les écrans connectés. Un hook qui lèverait une erreur ferait planter l'app à ce moment-là.
 - Le hook renvoie donc 0, qui ne correspond à aucun compte (AUTOINCREMENT commence à 1). Même une écriture serait refusée par la clé étrangère : c'est vérifié avec sqlite3.
 
+**Profil : onglets « À venir / Passés »** avec un composant `SegmentedControl` générique (`<T extends string>`) : TypeScript vérifie que les valeurs des options et de `onChange` sont les mêmes. Il est accessible (`accessibilityRole="tablist"` / `"tab"` et `accessibilityState.selected`) : VoiceOver annonce « onglet, sélectionné ». Le filtrage se fait en mémoire, sur la liste déjà chargée : pas de nouvelle requête au changement d'onglet.
+
 **Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
 
 **Pourquoi `SectionList` et pas `.map()` ?** Elle ne rend que les cartes visibles (virtualisation), gère les sections « À venir / Passés » et le « tirer pour rafraîchir ».
