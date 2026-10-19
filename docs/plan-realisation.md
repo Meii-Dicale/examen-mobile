@@ -150,7 +150,7 @@ Branches prévues :
   - formulaire de création ;
   - calendrier ;
   - profil.
-- Elle inclut la palette du logo (teal, navy, orange), la typo Montserrat, les composants (boutons, cartes, badges) et le mode clair/sombre.
+- Elle inclut la palette (Prune & pêche, retenue après comparaison), la typo Montserrat, les composants (boutons, cartes, badges) et le mode clair/sombre.
 - Tu la valides ou tu la fais ajuster. Les tokens validés deviennent ensuite `src/theme/colors.ts` et `tokens.ts`.
 
 **Jour 1 — base et navigation**
