@@ -15,7 +15,7 @@ La stack et les conventions sont reprises de tes projets `pokedexReactNative/` e
 ## Stack (identique à tes projets)
 | Besoin | Choix | Repris de |
 |---|---|---|
-| Base | Expo SDK 57, TypeScript strict, alias `@/*` → `src/*`, `typedRoutes` | Pokédex |
+| Base | Expo SDK 58, TypeScript strict, alias `@/*` → `src/*`, `typedRoutes` | Pokédex |
 | Navigation | Expo Router, construit **sur React Navigation**, ce qui respecte la contrainte du sujet. Groupes `(auth)` / `(app)` avec `Stack.Protected`, et `(tabs)` | YouAreTheHero `app/_layout.tsx` |
 | Données | `expo-sqlite` (`SQLiteProvider` + `useSQLiteContext`) | nouveau |
 | Session | `expo-secure-store` (id de l'utilisateur connecté) | YouAreTheHero `services/tokenStorage.ts` |
@@ -80,7 +80,7 @@ Règle reprise de YouAreTheHero : **pas de SQL ni de `fetch` dans un composant**
   - Le service demande la permission avec `requestCalendarPermissionsAsync`, choisit le calendrier par défaut, puis crée l'événement avec titre, lieu, notes, date de début, date de fin (+2 h par défaut) et un rappel 1 h avant.
   - L'id renvoyé est enregistré dans `participations.device_calendar_event_id`. Ça évite les doublons (le bouton devient « Ajouté à ton agenda ») et permet de supprimer l'événement de l'agenda si on annule sa participation.
   - Si l'utilisateur refuse la permission, un message explique comment l'activer dans les réglages, et le reste de l'app fonctionne normalement.
-  - La permission est déclarée dans `app.json` (plugin `expo-calendar`). On vérifiera l'API exacte dans la doc Expo SDK 57 au moment de coder.
+  - La permission est déclarée dans `app.json` (plugin `expo-calendar`). On vérifiera l'API exacte dans la doc Expo SDK 58 au moment de coder.
 - **Météo** : la clé est dans `.env` (`EXPO_PUBLIC_OPENWEATHER_KEY`, et `.env` est ignoré par git). L'appel utilise `/data/2.5/forecast` (lat/lon, `units=metric`, `lang=fr`) et prend le créneau le plus proche de l'heure de l'événement. Le gratuit ne prévoit que **5 jours** : au-delà, ou si l'événement est passé, on affiche « Prévision indisponible ».
 - **Géolocalisation** : `expo-location` demande la permission au premier affichage, puis la distance Haversine est affichée en km sur la carte et sur le détail. Si l'utilisateur refuse, la distance est simplement masquée.
 - **Photos (bonus perso)** : visibles seulement si l'utilisateur participe et que la date est passée. `expo-image-picker` propose la caméra ou la galerie. Le fichier est copié dans le dossier document de l'app avec `expo-file-system`, sinon l'URI temporaire disparaîtrait. L'URI est enregistrée dans `event_photos` et affichée dans une galerie horizontale avec `expo-image`. Un appui long supprime ses propres photos.
@@ -150,7 +150,7 @@ Branches prévues :
   - formulaire de création ;
   - calendrier ;
   - profil.
-- Elle inclut la palette du logo (teal, navy, orange), la typo Montserrat, les composants (boutons, cartes, badges) et le mode clair/sombre.
+- Elle inclut la palette (Prune & pêche, retenue après comparaison), la typo Montserrat, les composants (boutons, cartes, badges) et le mode clair/sombre.
 - Tu la valides ou tu la fais ajuster. Les tokens validés deviennent ensuite `src/theme/colors.ts` et `tokens.ts`.
 
 **Jour 1 — base et navigation**

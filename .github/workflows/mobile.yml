@@ -1,0 +1,60 @@
+name: mobile
+
+# Vérifie que l'app n'est pas cassée avant chaque fusion dans main.
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+# Pas de filtre paths : le check "mobile" est requis par la règle de main,
+# il doit toujours se déclencher pour ne pas rester bloqué "en attente".
+
+permissions:
+  contents: read
+
+# Un nouveau push sur la même branche annule la vérification en cours
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  mobile:
+    name: mobile
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: EventEase
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: EventEase/package-lock.json
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Vérifier la compatibilité des dépendances avec le SDK Expo
+        run: npx expo install --check
+
+      - name: Lint
+        run: npx expo lint
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      # Les tests unitaires (jest-expo) arrivent avec la branche test/utils :
+      # l'étape ne s'exécute que si un script "test" existe dans package.json.
+      - name: Tests
+        run: |
+          if npm pkg get scripts.test | grep -q '"'; then
+            npm test -- --ci
+          else
+            echo "Pas encore de tests"
+          fi
