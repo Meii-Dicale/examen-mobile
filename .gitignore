@@ -1,0 +1,25 @@
+# --- Projets de référence (présents en local, jamais versionnés ici) ---
+/pokedexReactNative/
+/YouAreTheHero/
+
+# Ancienne piste de logo (abandonnée au profit du logo B dessiné dans la maquette)
+/Gemini_Generated_Image_*.jpg
+
+# --- Node / Expo ---
+# L'app EventEase/ aura aussi son propre .gitignore généré par create-expo-app
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+npm-debug.*
+
+# --- Secrets (clé OpenWeather, etc.) ---
+.env
+.env*.local
+
+# --- Système et éditeurs ---
+.DS_Store
+.idea/
+.vscode/
+.claude/settings.local.json

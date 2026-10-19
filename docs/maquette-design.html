@@ -1,0 +1,794 @@
+<title>Maquette EventEase</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Mise en page : planche de maquette — en-tête, palette/typo, puis grille de téléphones qui passe à une colonne sur mobile.
+   Tokens de la page (le cadre) d'un côté, tokens de l'app (dans les téléphones) de l'autre. */
+:root {
+  /* Page */
+  --bg: #EDF0F1;
+  --paper: #FFFFFF;
+  --ink: #1E2761;
+  --ink-soft: #545C80;
+  --rule: #D6DCE0;
+  --frame: #1E2761;
+  /* Palette de l'app : valeurs par défaut = palette choisie « Prune & pêche », remplacées en JS si on compare une autre palette */
+  --L-bg: #F8F4F7; --L-surface: #FFFFFF; --L-text: #2A1730; --L-muted: #62506A; --L-border: #E8DDE6;
+  --L-primary: #7A2E8E; --L-primarySoft: #F3E3F6; --L-onPrimary: #FFFFFF;
+  --L-accent: #FF9466; --L-accentSoft: #FFE9DF; --L-accentInk: #9A3A10; --L-onAccent: #2A1730; --L-danger: #B42318;
+  --D-bg: #1A1020; --D-surface: #26182E; --D-text: #F6EEF7; --D-muted: #BBA8C2; --D-border: #3B2845;
+  --D-primary: #D99BEA; --D-primarySoft: #3E2149; --D-onPrimary: #1A1020;
+  --D-accent: #FFA680; --D-accentSoft: #41241A; --D-accentInk: #FFC2A8; --D-onAccent: #2A1730; --D-danger: #F07A6E;
+  /* Marque sur la page */
+  --brand-teal: var(--L-primary);
+  --brand-orange: var(--L-accent);
+  --on-brand: #FFFFFF;
+  /* Typo */
+  --font-display: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Montserrat", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0B1024; --paper: #141B3A; --ink: #E9ECF7; --ink-soft: #A2A9C8; --rule: #2A3360; --frame: #050816;
+    --brand-teal: var(--D-primary); --on-brand: #0B1024;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0B1024; --paper: #141B3A; --ink: #E9ECF7; --ink-soft: #A2A9C8; --rule: #2A3360; --frame: #050816;
+  --brand-teal: var(--D-primary); --on-brand: #0B1024;
+  color-scheme: dark;
+}
+
+/* Tokens de l'application (ceux qui iront dans src/theme/colors.ts) */
+.phone {
+  --app-bg: var(--L-bg);
+  --app-surface: var(--L-surface);
+  --app-text: var(--L-text);
+  --app-muted: var(--L-muted);
+  --app-border: var(--L-border);
+  --app-primary: var(--L-primary);
+  --app-primary-soft: var(--L-primarySoft);
+  --app-on-primary: var(--L-onPrimary);
+  --app-accent: var(--L-accent);
+  --app-accent-soft: var(--L-accentSoft);
+  --app-accent-ink: var(--L-accentInk);
+  --app-on-accent: var(--L-onAccent);
+  --app-danger: var(--L-danger);
+  --app-tab: var(--L-surface);
+}
+.phone[data-app="dark"] {
+  --app-bg: var(--D-bg);
+  --app-surface: var(--D-surface);
+  --app-text: var(--D-text);
+  --app-muted: var(--D-muted);
+  --app-border: var(--D-border);
+  --app-primary: var(--D-primary);
+  --app-primary-soft: var(--D-primarySoft);
+  --app-on-primary: var(--D-onPrimary);
+  --app-accent: var(--D-accent);
+  --app-accent-soft: var(--D-accentSoft);
+  --app-accent-ink: var(--D-accentInk);
+  --app-on-accent: var(--D-onAccent);
+  --app-danger: var(--D-danger);
+  --app-tab: var(--D-surface);
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  line-height: 1.5;
+}
+.wrap {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding-block: 40px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+}
+
+/* En-tête */
+.masthead { display: flex; flex-wrap: wrap; gap: 24px 40px; align-items: center; }
+.masthead .mark { width: 76px; height: 76px; flex: none; }
+.masthead .titles { flex: 1 1 320px; min-width: 0; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 6px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(30px, 5vw, 44px); line-height: 1.05; margin: 0; letter-spacing: -.02em; text-wrap: balance; }
+h1 span { color: var(--brand-teal); }
+.lede { margin: 10px 0 0; max-width: 62ch; color: var(--ink-soft); font-size: 15px; }
+.toggle { display: inline-flex; border: 1.5px solid var(--rule); border-radius: 999px; padding: 4px; gap: 4px; background: var(--paper); }
+.toggle button { font: 600 13px var(--font-body); border: 0; background: transparent; color: var(--ink-soft); padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.toggle button[aria-pressed="true"] { background: var(--ink); color: var(--bg); }
+.toggle button:focus-visible, .phone button:focus-visible { outline: 2px solid var(--brand-orange); outline-offset: 2px; }
+.toggle-label { font-size: 12px; color: var(--ink-soft); display: block; margin-bottom: 6px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .06em; }
+
+h2 { font-family: var(--font-display); font-size: 20px; font-weight: 700; margin: 0 0 4px; text-wrap: balance; }
+.section-head p { margin: 0; color: var(--ink-soft); font-size: 14px; max-width: 70ch; }
+.section-head { margin-bottom: 20px; }
+
+/* Palette & typo */
+.foundations { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+.panel { background: var(--paper); border: 1px solid var(--rule); border-radius: 14px; padding: 20px; min-width: 0; }
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 12px; }
+.swatch .chip { height: 56px; border-radius: 10px; border: 1px solid var(--rule); }
+.swatch b { display: block; font-size: 13px; margin-top: 8px; }
+.swatch code { font-family: var(--font-mono); font-size: 11.5px; color: var(--ink-soft); }
+.swatch small { display: block; font-size: 11.5px; color: var(--ink-soft); line-height: 1.35; }
+.typescale { display: flex; flex-direction: column; gap: 10px; }
+.typescale div { display: flex; align-items: baseline; gap: 14px; border-bottom: 1px dashed var(--rule); padding-bottom: 8px; min-width: 0; }
+.typescale div:last-child { border-bottom: 0; }
+.typescale code { font-family: var(--font-mono); font-size: 11px; color: var(--ink-soft); width: 82px; flex: none; }
+.typescale span { min-width: 0; overflow-wrap: anywhere; }
+
+/* Grille des écrans */
+.screens { display: grid; grid-template-columns: repeat(auto-fill, minmax(292px, 1fr)); gap: 40px 24px; justify-items: center; }
+figure { margin: 0; display: flex; flex-direction: column; gap: 12px; align-items: center; width: 100%; max-width: 300px; }
+figcaption { width: 100%; font-size: 13px; color: var(--ink-soft); }
+figcaption b { color: var(--ink); display: block; font-size: 14px; }
+figcaption code { font-family: var(--font-mono); font-size: 11px; }
+
+/* Le téléphone */
+.phone {
+  width: 100%; max-width: 292px; aspect-ratio: 292 / 612;
+  background: var(--app-bg); color: var(--app-text);
+  border: 9px solid var(--frame); border-radius: 40px;
+  position: relative; overflow: hidden;
+  display: flex; flex-direction: column;
+  font-family: var(--font-body);
+  box-shadow: 0 18px 40px -22px rgba(14, 20, 50, .45);
+  transition: background-color .25s ease, color .25s ease;
+}
+.phone .status { height: 30px; flex: none; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; font-size: 11px; font-weight: 700; }
+.phone .status .notch { width: 74px; height: 20px; background: var(--frame); border-radius: 0 0 12px 12px; align-self: flex-start; }
+.phone .body { flex: 1; overflow: hidden; padding: 6px 14px 12px; display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+.phone .tabs { flex: none; display: flex; justify-content: space-around; background: var(--app-tab); border-top: 1px solid var(--app-border); padding: 8px 0 14px; }
+.phone .tabs span { display: flex; flex-direction: column; align-items: center; gap: 2px; font-size: 10px; font-weight: 600; color: var(--app-muted); }
+.phone .tabs span.on { color: var(--app-primary); }
+.phone svg.i { width: 18px; height: 18px; flex: none; }
+.phone svg.i-sm { width: 13px; height: 13px; flex: none; }
+
+/* Éléments de l'app */
+.a-title { font-weight: 800; font-size: 21px; letter-spacing: -.01em; margin: 0; line-height: 1.15; }
+.a-sub { font-size: 12px; color: var(--app-muted); margin: 0; }
+.a-row { display: flex; align-items: center; gap: 8px; }
+.a-between { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.a-chips { display: flex; gap: 6px; }
+.a-chip { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 999px; border: 1px solid var(--app-border); background: var(--app-surface); color: var(--app-muted); white-space: nowrap; }
+.a-chip.on { background: var(--app-text); color: var(--app-bg); border-color: var(--app-text); }
+.a-card { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 16px; padding: 11px; display: flex; gap: 11px; }
+.a-date { flex: none; width: 44px; border-radius: 11px; background: var(--app-primary-soft); color: var(--app-primary); text-align: center; padding: 6px 0; line-height: 1.05; }
+.a-date b { display: block; font-size: 18px; font-weight: 800; }
+.a-date small { font-size: 9.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.a-date.past { background: var(--app-bg); color: var(--app-muted); }
+.a-card h4 { margin: 0; font-size: 13.5px; font-weight: 700; line-height: 1.25; }
+.a-card p { margin: 3px 0 6px; font-size: 11.5px; color: var(--app-muted); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.a-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+.a-badge { display: inline-flex; align-items: center; gap: 3px; font-size: 10px; font-weight: 700; padding: 3px 7px; border-radius: 999px; background: var(--app-bg); color: var(--app-muted); }
+.a-badge.go { background: var(--app-primary-soft); color: var(--app-primary); }
+.a-badge.warm { background: var(--app-accent-soft); color: var(--app-accent-ink); }
+.a-btn { font: 700 14px var(--font-body); border: 0; border-radius: 14px; padding: 12px; width: 100%; background: var(--app-primary); color: var(--app-on-primary); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.a-btn.ghost { background: transparent; color: var(--app-primary); border: 1.5px solid var(--app-primary); }
+.a-btn.danger { background: transparent; color: var(--app-danger); border: 1.5px solid var(--app-border); }
+.a-btn.joined { background: var(--app-primary-soft); color: var(--app-primary); }
+.a-field { display: flex; flex-direction: column; gap: 4px; }
+.a-field label { font-size: 11px; font-weight: 700; color: var(--app-muted); }
+.a-input { background: var(--app-surface); border: 1.5px solid var(--app-border); border-radius: 12px; padding: 10px 11px; font-size: 13px; color: var(--app-text); display: flex; align-items: center; gap: 7px; }
+.a-input.focus { border-color: var(--app-primary); }
+.a-input.area { min-height: 62px; align-items: flex-start; line-height: 1.35; }
+.a-input .ph { color: var(--app-muted); }
+.a-fab { position: absolute; right: 16px; bottom: 74px; width: 50px; height: 50px; border-radius: 17px; background: var(--app-accent); color: var(--app-on-accent); display: grid; place-items: center; box-shadow: 0 8px 18px -8px rgba(10, 20, 40, .55); }
+.a-link { color: var(--app-primary); font-weight: 700; }
+.a-muted { color: var(--app-muted); }
+.a-section { font-size: 11px; font-weight: 700; color: var(--app-muted); text-transform: uppercase; letter-spacing: .07em; margin: 4px 0 0; }
+
+/* Splash */
+.splash { background: var(--app-primary); color: var(--app-on-primary); align-items: center; justify-content: center; gap: 14px; }
+.splash .body { align-items: center; justify-content: center; text-align: center; }
+.splash .wordmark { font-weight: 800; font-size: 28px; letter-spacing: -.02em; }
+.splash .sub { font-size: 13px; font-weight: 500; opacity: .85; margin-top: -8px; }
+.splash .loader { width: 64px; height: 4px; border-radius: 4px; background: rgba(255,255,255,.25); overflow: hidden; margin-top: 18px; }
+.splash .loader i { display: block; width: 40%; height: 100%; background: var(--app-accent); border-radius: 4px; animation: load 1.4s ease-in-out infinite; }
+@keyframes load { 0% { transform: translateX(-100%); } 100% { transform: translateX(260%); } }
+
+/* Détail */
+.hero-block { background: var(--app-primary); color: var(--app-on-primary); border-radius: 18px; padding: 14px; display: flex; flex-direction: column; gap: 6px; }
+.hero-block h3 { margin: 0; font-size: 17px; font-weight: 800; line-height: 1.2; }
+.hero-block .a-row { font-size: 11.5px; font-weight: 600; opacity: .92; }
+.weather { background: var(--app-accent-soft); border-radius: 14px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+.weather .temp { font-size: 22px; font-weight: 800; color: var(--app-accent-ink); line-height: 1; }
+.weather small { display: block; font-size: 10.5px; color: var(--app-accent-ink); font-weight: 600; }
+.desc { font-size: 12px; line-height: 1.45; margin: 0; }
+.avatars { display: flex; }
+.avatars i { width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--app-bg); margin-left: -7px; display: grid; place-items: center; font-size: 9px; font-style: normal; font-weight: 800; background: var(--app-primary); color: var(--app-on-primary); }
+.avatars i:nth-child(2) { background: var(--app-accent); color: var(--app-on-accent); }
+.avatars i:nth-child(3) { background: var(--app-text); color: var(--app-bg); }
+.avatars i:nth-child(4) { background: var(--app-primary-soft); color: var(--app-primary); }
+.avatars i:first-child { margin-left: 0; }
+.photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.photos .ph { aspect-ratio: 1; border-radius: 10px; max-width: 100%; }
+.photos .add { border: 1.5px dashed var(--app-primary); color: var(--app-primary); display: grid; place-items: center; font-size: 10px; font-weight: 700; text-align: center; }
+
+/* Calendrier */
+.cal { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 16px; padding: 10px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px 0; text-align: center; font-size: 11px; font-variant-numeric: tabular-nums; }
+.cal-grid .dow { font-size: 9.5px; font-weight: 700; color: var(--app-muted); padding-bottom: 4px; }
+.cal-grid .d { height: 28px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; font-weight: 500; }
+.cal-grid .d.today { color: var(--app-primary); font-weight: 800; }
+.cal-grid .d.sel span { background: var(--app-primary); color: var(--app-on-primary); width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-weight: 700; }
+.cal-grid .d.ev::after { content: ""; position: absolute; bottom: 1px; width: 4px; height: 4px; border-radius: 50%; background: var(--app-accent-ink); }
+.cal-grid .d.past { color: var(--app-muted); }
+
+/* Profil */
+.avatar-lg { width: 54px; height: 54px; border-radius: 18px; background: var(--app-primary); color: var(--app-on-primary); display: grid; place-items: center; font-weight: 800; font-size: 20px; flex: none; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+.stats div { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 12px; padding: 8px; text-align: center; }
+.stats b { display: block; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.stats small { font-size: 9.5px; color: var(--app-muted); font-weight: 600; }
+.list { background: var(--app-surface); border: 1px solid var(--app-border); border-radius: 14px; }
+.list > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; font-size: 12.5px; font-weight: 600; border-bottom: 1px solid var(--app-border); }
+.list > div:last-child { border-bottom: 0; }
+.switch { width: 34px; height: 20px; border-radius: 999px; background: var(--app-border); position: relative; flex: none; }
+.switch::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .2s; }
+.phone[data-app="dark"] .switch { background: var(--app-primary); }
+.phone[data-app="dark"] .switch::after { left: 16px; }
+
+/* Composants & décisions */
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.decisions .panel h3 { margin: 0 0 6px; font-size: 15px; }
+.decisions .panel p { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+.decisions .q { font-family: var(--font-mono); font-size: 11px; color: var(--brand-teal); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; display: block; }
+
+/* Propositions de logo */
+.logos { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.logo-card { display: flex; flex-direction: column; gap: 14px; }
+.logo-card .tiles { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.tile { aspect-ratio: 1; max-width: 100%; border-radius: 14px; display: grid; place-items: center; }
+.tile svg { width: 64%; height: 64%; }
+.tile.light { background: var(--L-bg); color: var(--L-primary); border: 1px solid var(--rule); }
+.tile.brand { background: var(--L-primary); color: var(--L-onPrimary); }
+.tile.icon { background: var(--L-text); color: var(--L-bg); border-radius: 22%; }
+.lockup { display: flex; align-items: center; gap: 10px; font: 800 22px var(--font-display); letter-spacing: -.02em; }
+.lockup svg { width: 36px; height: 36px; color: var(--brand-teal); flex: none; }
+.lockup span span { color: var(--brand-teal); }
+.logo-card h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.logo-card p { margin: 0; font-size: 13.5px; color: var(--ink-soft); }
+.tag { font: 600 10.5px var(--font-mono); text-transform: uppercase; letter-spacing: .06em; padding: 3px 8px; border-radius: 999px; background: var(--brand-teal); color: var(--on-brand); }
+
+/* Sélecteur de palette */
+.palettes { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.pal { font: inherit; text-align: left; cursor: pointer; background: var(--paper); color: var(--ink); border: 2px solid var(--rule); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.pal[aria-pressed="true"] { border-color: var(--ink); }
+.pal:focus-visible { outline: 2px solid var(--brand-teal); outline-offset: 2px; }
+.pal .dots { display: flex; gap: 4px; }
+.pal .dots i { width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--rule); }
+.pal b { font-size: 14px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.pal small { font-size: 12px; color: var(--ink-soft); line-height: 1.4; }
+.pal .score { font: 600 10.5px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; padding: 2px 7px; border-radius: 999px; }
+.score.ok { background: #DCF2E3; color: #145C2E; }
+.score.ko { background: #FBE1DE; color: #8F1D12; }
+.contrast-wrap { overflow-x: auto; }
+table.contrast { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 460px; }
+table.contrast th, table.contrast td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); }
+table.contrast th { font: 600 11px var(--font-mono); text-transform: uppercase; letter-spacing: .05em; color: var(--ink-soft); }
+table.contrast td.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.sample { display: inline-block; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 12px; }
+.pass, .fail { font: 600 10.5px var(--font-mono); padding: 2px 6px; border-radius: 6px; margin-left: 6px; }
+.pass { background: #DCF2E3; color: #145C2E; }
+.fail { background: #FBE1DE; color: #8F1D12; }
+.tile-legend { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; font: 500 10.5px var(--font-mono); color: var(--ink-soft); text-align: center; margin-top: -8px; }
+
+footer { font-size: 12.5px; color: var(--ink-soft); border-top: 1px solid var(--rule); padding-top: 16px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .splash .loader i { animation: none; width: 60%; }
+  .phone, .switch::after { transition: none; }
+}
+</style>
+
+<!-- Icônes réutilisées (équivalents @expo/vector-icons / Ionicons) -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="ic-list" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"/></symbol>
+    <symbol id="ic-cal" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3.5 10h17M8 3v4M16 3v4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="ic-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4.5 20c1.2-3.8 4-5.5 7.5-5.5s6.3 1.7 7.5 5.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="ic-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" fill="none"/></symbol>
+    <symbol id="ic-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/></symbol>
+    <symbol id="ic-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="ic-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-cloud" viewBox="0 0 24 24"><circle cx="8" cy="8" r="3" fill="none" stroke="currentColor" stroke-width="2"/><path d="M7 19h10a3.5 3.5 0 0 0 .4-7A5 5 0 0 0 8 12.6 3.2 3.2 0 0 0 7 19z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="ic-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="12" cy="13" r="3.4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="ic-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="ic-lock" viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+    <symbol id="ic-nav" viewBox="0 0 24 24"><path d="M20 4L4 11l7 2 2 7z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <!-- Logo A : un « e » minuscule + un point d'accent = « l'événement marqué » -->
+    <symbol id="logo-e" viewBox="0 0 100 100">
+      <path d="M21 54 H79 A29 29 0 1 0 72.2 72.6" fill="none" stroke="currentColor" stroke-width="13" stroke-linecap="butt"/>
+      <circle cx="83" cy="19" r="9" style="fill: var(--L-accent)"/>
+    </symbol>
+    <!-- Logo B (CHOISI, utilisé dans les écrans) : un ticket d'entrée avec une coche = « j'ai participé » -->
+    <symbol id="logo" viewBox="0 0 100 100">
+      <path d="M20 22 H80 A10 10 0 0 1 90 32 V44 A8 8 0 0 0 90 60 V72 A10 10 0 0 1 80 82 H20 A10 10 0 0 1 10 72 V60 A8 8 0 0 0 10 44 V32 A10 10 0 0 1 20 22 Z" fill="currentColor"/>
+      <path d="M33 52 L45 64 L67 40" fill="none" style="stroke: var(--L-accent)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <!-- Logo C : trois membres en cercle autour d'un point orange = « on se rassemble » -->
+    <symbol id="logo-cercle" viewBox="0 0 100 100">
+      <circle cx="50" cy="52" r="30" fill="none" stroke="currentColor" stroke-width="7"/>
+      <circle cx="50" cy="22" r="11" fill="currentColor"/>
+      <circle cx="76" cy="67" r="11" fill="currentColor"/>
+      <circle cx="24" cy="67" r="11" fill="currentColor"/>
+      <circle cx="50" cy="52" r="11" style="fill: var(--L-accent)"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <svg class="mark" style="color: var(--brand-teal)" role="img" aria-label="Logo EventEase"><use href="#logo"/></svg>
+    <div class="titles">
+      <p class="eyebrow">Examen CDA · Maquette v1 · 19 oct. 2026</p>
+      <h1>Event<span>Ease</span>, l'app des membres et bénévoles</h1>
+      <p class="lede">Les écrans du prototype React Native, avec la palette choisie : une couleur principale pour les actions, une couleur d'accent pour le bouton + et la météo. Les données affichées sont des exemples, comme le seed de la base SQLite.</p>
+    </div>
+    <div>
+      <span class="toggle-label" id="theme-label">Thème de l'app</span>
+      <div class="toggle" role="group" aria-labelledby="theme-label">
+        <button type="button" id="btn-light" aria-pressed="true">Clair</button>
+        <button type="button" id="btn-dark" aria-pressed="false">Sombre</button>
+      </div>
+    </div>
+  </header>
+
+  <section>
+    <div class="section-head">
+      <h2>Palettes de couleurs</h2>
+      <p>Palette retenue : <strong>Prune & pêche</strong>. Les autres restent cliquables pour comparer, et toute la maquette (logos, écrans, clair et sombre) se met à jour. Les quatre nouvelles palettes respectent le niveau AA des règles d'accessibilité WCAG en mode clair et en mode sombre. Le tableau en dessous montre les contrastes calculés pour la palette choisie.</p>
+    </div>
+    <div class="palettes" id="palettes" role="group" aria-label="Palette de couleurs"></div>
+    <div class="panel contrast-wrap" style="margin-top:16px">
+      <table class="contrast">
+        <thead><tr><th>Usage dans l'app</th><th>Clair</th><th>Sombre</th></tr></thead>
+        <tbody id="contrast-rows"></tbody>
+      </table>
+      <p class="a-sub" style="margin-top:10px; color: var(--ink-soft); font-size:12.5px">Seuil AA : 4,5:1 pour le texte, 3:1 pour les icônes et les points du calendrier. La couleur d'accent sert seulement de fond (bouton +, météo), jamais de couleur de texte sur fond clair, car elle n'est pas assez contrastée pour ça.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Propositions de logo</h2>
+      <p>Trois pistes, avec les mêmes couleurs. Chacune est montrée sur fond clair, sur le fond du splash et en icône d'application. La piste B, choisie, est celle qu'utilisent les écrans ci-dessous.</p>
+    </div>
+    <div class="logos">
+      <div class="panel logo-card">
+        <h3>A · Le point de rendez-vous</h3>
+        <div class="tiles">
+          <div class="tile light"><svg aria-hidden="true"><use href="#logo-e"/></svg></div>
+          <div class="tile brand"><svg aria-hidden="true"><use href="#logo-e"/></svg></div>
+          <div class="tile icon"><svg aria-hidden="true"><use href="#logo-e"/></svg></div>
+        </div>
+        <div class="tile-legend"><span>clair</span><span>splash</span><span>icône</span></div>
+        <div class="lockup"><svg role="img" aria-label="Logo A"><use href="#logo-e"/></svg><span>Event<span>Ease</span></span></div>
+        <p>Un « e » minuscule pour EventEase, et un point orange posé à côté comme un événement noté dans l'agenda. Très simple, il reste lisible même en tout petit.</p>
+      </div>
+      <div class="panel logo-card">
+        <h3>B · Le ticket validé <span class="tag">Choisi</span></h3>
+        <div class="tiles">
+          <div class="tile light"><svg aria-hidden="true"><use href="#logo"/></svg></div>
+          <div class="tile brand"><svg aria-hidden="true"><use href="#logo"/></svg></div>
+          <div class="tile icon"><svg aria-hidden="true"><use href="#logo"/></svg></div>
+        </div>
+        <div class="tile-legend"><span>clair</span><span>splash</span><span>icône</span></div>
+        <div class="lockup"><svg role="img" aria-label="Logo B"><use href="#logo"/></svg><span>Event<span>Ease</span></span></div>
+        <p>Un ticket d'entrée avec une coche orange. Il rappelle directement la fonction « Je participe » de l'app.</p>
+      </div>
+      <div class="panel logo-card">
+        <h3>C · Le cercle des membres</h3>
+        <div class="tiles">
+          <div class="tile light"><svg aria-hidden="true"><use href="#logo-cercle"/></svg></div>
+          <div class="tile brand"><svg aria-hidden="true"><use href="#logo-cercle"/></svg></div>
+          <div class="tile icon"><svg aria-hidden="true"><use href="#logo-cercle"/></svg></div>
+        </div>
+        <div class="tile-legend"><span>clair</span><span>splash</span><span>icône</span></div>
+        <div class="lockup"><svg role="img" aria-label="Logo C"><use href="#logo-cercle"/></svg><span>Event<span>Ease</span></span></div>
+        <p>Trois membres réunis autour d'un point orange, l'événement. Il met l'accent sur l'association et les bénévoles plutôt que sur l'outil.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Fondations</h2>
+      <p>Ces valeurs deviendront <code>src/theme/colors.ts</code> et <code>src/theme/tokens.ts</code>, comme dans ton Pokédex.</p>
+    </div>
+    <div class="foundations">
+      <div class="panel">
+        <div class="swatches">
+          <div class="swatch"><div class="chip" style="background:var(--L-primary)"></div><b>primary</b><code data-hex="primary"></code><small>Boutons, onglet actif, dates</small></div>
+          <div class="swatch"><div class="chip" style="background:var(--L-text)"></div><b>text</b><code data-hex="text"></code><small>Titres et texte</small></div>
+          <div class="swatch"><div class="chip" style="background:var(--L-accent)"></div><b>accent</b><code data-hex="accent"></code><small>Bouton +, fond météo</small></div>
+          <div class="swatch"><div class="chip" style="background:var(--L-primarySoft)"></div><b>primarySoft</b><code data-hex="primarySoft"></code><small>Badge « Je participe »</small></div>
+          <div class="swatch"><div class="chip" style="background:var(--L-bg)"></div><b>background</b><code data-hex="bg"></code><small>Fond des écrans</small></div>
+          <div class="swatch"><div class="chip" style="background:var(--L-danger)"></div><b>danger</b><code data-hex="danger"></code><small>Supprimer</small></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="typescale">
+          <div><code>title 22/800</code><span style="font: 800 22px var(--font-display)">Mes événements</span></div>
+          <div><code>heading 17/700</code><span style="font: 700 17px var(--font-display)">Atelier compostage</span></div>
+          <div><code>body 13/400</code><span style="font: 400 13px var(--font-body)">Apprendre à composter en appartement.</span></div>
+          <div><code>label 11/700</code><span style="font: 700 11px var(--font-body); text-transform: uppercase; letter-spacing: .07em">Participants</span></div>
+          <div><code>radius</code><span style="font: 500 13px var(--font-body)">10 · 14 · 16 · 18 · pill</span></div>
+        </div>
+        <p class="a-sub" style="margin-top:12px; color: var(--ink-soft)">Une seule famille : Montserrat, la police du logo (<code>@expo-google-fonts/montserrat</code>).</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>Écrans</h2>
+      <p>Chaque écran correspond à une route Expo Router. Le bouton « Je participe » de l'écran de détail est cliquable pour voir ses deux états.</p>
+    </div>
+
+    <div class="screens">
+
+      <!-- 1. Splash -->
+      <figure>
+        <div class="phone splash">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <svg style="width:96px;height:96px;color:#fff" aria-hidden="true"><use href="#logo"/></svg>
+            <div class="wordmark">EventEase</div>
+            <div class="sub">Association</div>
+            <div class="loader"><i></i></div>
+          </div>
+        </div>
+        <figcaption><b>Splash</b><code>expo-splash-screen</code> · chargement de la base et de la session</figcaption>
+      </figure>
+
+      <!-- 2. Connexion -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body" style="gap:14px; padding-top:26px">
+            <svg style="width:52px;height:52px;color:var(--app-primary)" aria-hidden="true"><use href="#logo"/></svg>
+            <div>
+              <p class="a-title">Bon retour !</p>
+              <p class="a-sub">Connecte-toi pour voir les prochains événements.</p>
+            </div>
+            <div class="a-field"><label>Email</label><div class="a-input focus"><svg class="i-sm"><use href="#ic-mail"/></svg>demo@eventease.fr</div></div>
+            <div class="a-field"><label>Mot de passe</label><div class="a-input"><svg class="i-sm"><use href="#ic-lock"/></svg>••••••••</div></div>
+            <button class="a-btn" type="button">Se connecter</button>
+            <p class="a-sub" style="text-align:center">Pas encore de compte ? <span class="a-link">Créer un compte</span></p>
+            <p class="a-sub" style="text-align:center; margin-top:auto; font-size:10.5px">Données stockées sur ton téléphone uniquement</p>
+          </div>
+        </div>
+        <figcaption><b>Connexion</b><code>(auth)/index.tsx</code> · même mise en page pour l'inscription, avec le champ « Nom » en plus</figcaption>
+      </figure>
+
+      <!-- 3. Liste -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <div>
+              <p class="a-sub">Bonjour Camille</p>
+              <p class="a-title">Événements</p>
+            </div>
+            <div class="a-chips"><span class="a-chip on">À venir</span><span class="a-chip">Mes participations</span><span class="a-chip">Passés</span></div>
+            <div class="a-card">
+              <div class="a-date"><b>21</b><small>oct.</small></div>
+              <div style="min-width:0">
+                <h4>Atelier compostage urbain</h4>
+                <p>Apprendre à composter en appartement, avec un lombricomposteur à gagner.</p>
+                <div class="a-meta"><span class="a-badge go"><svg class="i-sm"><use href="#ic-check"/></svg>Je participe</span><span class="a-badge warm"><svg class="i-sm"><use href="#ic-nav"/></svg>1,2 km</span></div>
+              </div>
+            </div>
+            <div class="a-card">
+              <div class="a-date"><b>22</b><small>oct.</small></div>
+              <div style="min-width:0">
+                <h4>Conférence : le bénévolat à l'ère numérique</h4>
+                <p>Table ronde avec trois associations lyonnaises, suivie d'un pot.</p>
+                <div class="a-meta"><span class="a-badge">14 inscrits</span><span class="a-badge warm"><svg class="i-sm"><use href="#ic-nav"/></svg>3,4 km</span></div>
+              </div>
+            </div>
+            <div class="a-card">
+              <div class="a-date"><b>24</b><small>oct.</small></div>
+              <div style="min-width:0">
+                <h4>Randonnée des Monts d'Or</h4>
+                <p>Boucle de 14 km, niveau facile. Prévoir pique-nique et chaussures.</p>
+                <div class="a-meta"><span class="a-badge">9 inscrits</span><span class="a-badge warm"><svg class="i-sm"><use href="#ic-nav"/></svg>12 km</span></div>
+              </div>
+            </div>
+          </div>
+          <span class="a-fab" aria-hidden="true"><svg class="i"><use href="#ic-plus"/></svg></span>
+          <div class="tabs"><span class="on"><svg class="i"><use href="#ic-list"/></svg>Événements</span><span><svg class="i"><use href="#ic-cal"/></svg>Calendrier</span><span><svg class="i"><use href="#ic-user"/></svg>Profil</span></div>
+        </div>
+        <figcaption><b>Liste des événements</b><code>(app)/(tabs)/index.tsx</code> · FlatList d'EventCard, bouton + pour créer</figcaption>
+      </figure>
+
+      <!-- 4. Détail à venir -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <div class="a-between"><svg class="i"><use href="#ic-back"/></svg><span class="a-row" style="color:var(--app-primary); font-size:12px; font-weight:700"><svg class="i-sm"><use href="#ic-edit"/></svg>Modifier</span></div>
+            <div class="hero-block">
+              <h3>Atelier compostage urbain</h3>
+              <div class="a-row"><svg class="i-sm"><use href="#ic-clock"/></svg>Mer. 21 octobre · 18:30</div>
+              <div class="a-row"><svg class="i-sm"><use href="#ic-pin"/></svg>Jardin des Capucins, Lyon 1er · à 1,2 km</div>
+            </div>
+            <div class="weather">
+              <svg class="i" style="color:var(--app-accent-ink); width:26px; height:26px"><use href="#ic-cloud"/></svg>
+              <div style="flex:1"><small>Météo prévue à 18:00</small><small style="font-weight:500">Nuageux · vent 12 km/h</small></div>
+              <span class="temp">14°</span>
+            </div>
+            <p class="desc">Apprendre à composter en appartement : bacs, lombricomposteur et erreurs à éviter. Un lombricomposteur est à gagner en fin d'atelier.</p>
+            <div class="a-between">
+              <span class="a-section" style="margin:0">Participants · 8</span>
+              <div class="avatars"><i>CM</i><i>JB</i><i>LW</i><i>+5</i></div>
+            </div>
+            <div style="margin-top:auto; display:flex; flex-direction:column; gap:8px">
+              <button class="a-btn ghost" type="button" id="add-cal"><svg class="i-sm"><use href="#ic-cal"/></svg><span>Ajouter à mon agenda</span></button>
+              <button class="a-btn joined" type="button" id="join" aria-pressed="true"><svg class="i-sm"><use href="#ic-check"/></svg><span>Je participe</span></button>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Détail, événement à venir</b><code>(app)/event/[id].tsx</code> · météo OpenWeather (moins de 5 jours), distance (expo-location), ajout à l'agenda du téléphone (<code>expo-calendar</code>)</figcaption>
+      </figure>
+
+      <!-- 5. Détail passé avec photos -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <div class="a-between"><svg class="i"><use href="#ic-back"/></svg><span class="a-badge">Terminé</span></div>
+            <div class="hero-block" style="background: var(--app-text); color: var(--app-bg)">
+              <h3>Pique-nique de rentrée</h3>
+              <div class="a-row"><svg class="i-sm"><use href="#ic-clock"/></svg>Dim. 4 octobre · 12:00</div>
+              <div class="a-row"><svg class="i-sm"><use href="#ic-pin"/></svg>Parc de la Tête d'Or · à 2,8 km</div>
+            </div>
+            <div class="a-meta"><span class="a-badge go"><svg class="i-sm"><use href="#ic-check"/></svg>Tu as participé</span><span class="a-badge">23 participants</span></div>
+            <div class="a-between"><span class="a-section" style="margin:0">Photos · 5</span><span class="a-sub">Appui long pour supprimer</span></div>
+            <div class="photos">
+              <div class="ph" style="background: linear-gradient(135deg, #6FBF73, #2E7D5B)"></div>
+              <div class="ph" style="background: linear-gradient(160deg, #F7C873, #E07A2E)"></div>
+              <div class="ph" style="background: linear-gradient(120deg, #8EC9E8, #3D7FB0)"></div>
+              <div class="ph" style="background: linear-gradient(140deg, #E9A6A6, #B5536B)"></div>
+              <div class="ph" style="background: linear-gradient(150deg, #B7D98B, #5E9C3B)"></div>
+              <div class="ph add"><span><svg class="i" style="display:block;margin:0 auto 2px"><use href="#ic-camera"/></svg>Ajouter</span></div>
+            </div>
+            <div style="margin-top:auto; display:grid; grid-template-columns:1fr 1fr; gap:8px">
+              <button class="a-btn ghost" type="button"><svg class="i-sm"><use href="#ic-camera"/></svg>Photo</button>
+              <button class="a-btn ghost" type="button">Galerie</button>
+            </div>
+          </div>
+        </div>
+        <figcaption><b>Détail, événement passé</b> Bonus photos : <code>expo-image-picker</code>, seulement si on a participé</figcaption>
+      </figure>
+
+      <!-- 6. Formulaire -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <div class="a-between"><span class="a-muted" style="font-size:12.5px; font-weight:600">Annuler</span><span style="font-weight:800; font-size:14px">Nouvel événement</span><span style="width:40px"></span></div>
+            <div class="a-field"><label>Titre *</label><div class="a-input focus">Collecte alimentaire</div></div>
+            <div class="a-field"><label>Description</label><div class="a-input area">Collecte au profit des Restos du cœur, devant le supermarché. Créneaux de 2 h.</div></div>
+            <div style="display:grid; grid-template-columns: 1.3fr 1fr; gap:8px">
+              <div class="a-field"><label>Date *</label><div class="a-input"><svg class="i-sm"><use href="#ic-cal"/></svg>sam. 7 nov.</div></div>
+              <div class="a-field"><label>Heure</label><div class="a-input"><svg class="i-sm"><use href="#ic-clock"/></svg>10:00</div></div>
+            </div>
+            <div class="a-field"><label>Lieu</label><div class="a-input"><svg class="i-sm"><use href="#ic-pin"/></svg>12 rue Garibaldi, Lyon</div></div>
+            <p class="a-sub" style="font-size:10.5px">L'adresse est convertie en coordonnées pour calculer la distance et la météo.</p>
+            <button class="a-btn" type="button" style="margin-top:auto">Créer l'événement</button>
+          </div>
+        </div>
+        <figcaption><b>Création / modification</b><code>EventForm</code> partagé · <code>datetimepicker</code> · modal</figcaption>
+      </figure>
+
+      <!-- 7. Calendrier -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <p class="a-title">Calendrier</p>
+            <div class="cal">
+              <div class="a-between" style="padding: 0 4px 8px"><svg class="i-sm"><use href="#ic-back"/></svg><b style="font-size:13px">Octobre 2026</b><svg class="i-sm" style="transform:scaleX(-1)"><use href="#ic-back"/></svg></div>
+              <div class="cal-grid" id="cal"></div>
+            </div>
+            <span class="a-section">Mercredi 21 octobre</span>
+            <div class="a-card">
+              <div class="a-date"><b>18:30</b><small style="text-transform:none">1 h 30</small></div>
+              <div style="min-width:0">
+                <h4>Atelier compostage urbain</h4>
+                <div class="a-meta" style="margin-top:5px"><span class="a-badge go"><svg class="i-sm"><use href="#ic-check"/></svg>Je participe</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="tabs"><span><svg class="i"><use href="#ic-list"/></svg>Événements</span><span class="on"><svg class="i"><use href="#ic-cal"/></svg>Calendrier</span><span><svg class="i"><use href="#ic-user"/></svg>Profil</span></div>
+        </div>
+        <figcaption><b>Calendrier</b><code>react-native-calendars</code> · un point orange par jour avec un événement</figcaption>
+      </figure>
+
+      <!-- 8. Profil -->
+      <figure>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span class="notch"></span><span>100%</span></div>
+          <div class="body">
+            <div class="a-row" style="gap:12px; margin-top:6px">
+              <div class="avatar-lg">CM</div>
+              <div><p class="a-title" style="font-size:18px">Camille Martin</p><p class="a-sub">demo@eventease.fr</p></div>
+            </div>
+            <div class="stats">
+              <div><b>6</b><small>Participations</small></div>
+              <div><b>2</b><small>Créés</small></div>
+              <div><b>5</b><small>Photos</small></div>
+            </div>
+            <span class="a-section">Mes prochaines participations</span>
+            <div class="list">
+              <div><span>Atelier compostage</span><span class="a-sub">21 oct.</span></div>
+              <div><span>Collecte alimentaire</span><span class="a-sub">7 nov.</span></div>
+            </div>
+            <span class="a-section">Préférences</span>
+            <div class="list">
+              <div><span>Mode sombre</span><span class="switch" aria-hidden="true"></span></div>
+              <div><span>Localisation</span><span class="a-badge go">Autorisée</span></div>
+            </div>
+            <button class="a-btn danger" type="button" style="margin-top:auto">Se déconnecter</button>
+          </div>
+          <div class="tabs"><span><svg class="i"><use href="#ic-list"/></svg>Événements</span><span><svg class="i"><use href="#ic-cal"/></svg>Calendrier</span><span class="on"><svg class="i"><use href="#ic-user"/></svg>Profil</span></div>
+        </div>
+        <figcaption><b>Profil</b><code>(app)/(tabs)/profile.tsx</code> · thème sauvegardé dans AsyncStorage</figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <h2>À valider avec toi</h2>
+      <p>Points de design à confirmer avant de passer au code du jour 1.</p>
+    </div>
+    <div class="decisions">
+      <div class="panel"><span class="q">Navigation</span><h3>3 onglets + bouton orange</h3><p>Événements, Calendrier, Profil. La création passe par le bouton + flottant plutôt que par un 4ᵉ onglet.</p></div>
+      <div class="panel"><span class="q">Logo · validé</span><h3>B, le ticket validé</h3><p>Il sera exporté en PNG pour l'icône et le splash (<code>app.json</code>), et gardé en SVG pour l'écran de connexion (<code>react-native-svg</code>).</p></div>
+      <div class="panel"><span class="q">Couleurs · validé</span><h3>Prune & pêche</h3><p>Conforme au niveau AA en clair et en sombre (contraste minimum 6:1). La pêche sert seulement de fond, jamais de couleur de texte.</p></div>
+      <div class="panel"><span class="q">Photos</span><h3>Réservées aux participants</h3><p>La galerie n'apparaît que sur un événement passé auquel tu as participé. Les autres membres la voient en lecture seule.</p></div>
+    </div>
+  </section>
+
+  <footer>Maquette statique EventEase · les noms, lieux et chiffres sont des exemples qui serviront de données de démo (seed).</footer>
+</div>
+
+<script>
+  // Bascule clair / sombre des téléphones (simule le ThemeContext de l'app)
+  const phones = document.querySelectorAll('.phone:not(.splash)');
+  const btnLight = document.getElementById('btn-light');
+  const btnDark = document.getElementById('btn-dark');
+  function setAppTheme(mode) {
+    phones.forEach(p => p.setAttribute('data-app', mode));
+    btnLight.setAttribute('aria-pressed', String(mode === 'light'));
+    btnDark.setAttribute('aria-pressed', String(mode === 'dark'));
+    try { localStorage.setItem('eventease-maquette-theme', mode); } catch (e) {}
+  }
+  btnLight.addEventListener('click', () => setAppTheme('light'));
+  btnDark.addEventListener('click', () => setAppTheme('dark'));
+  try { const saved = localStorage.getItem('eventease-maquette-theme'); if (saved === 'dark') setAppTheme('dark'); } catch (e) {}
+
+  // Bouton « Je participe » cliquable (deux états)
+  const join = document.getElementById('join');
+  join.addEventListener('click', () => {
+    const on = join.getAttribute('aria-pressed') === 'true';
+    join.setAttribute('aria-pressed', String(!on));
+    join.classList.toggle('joined', !on);
+    join.querySelector('span').textContent = on ? 'Participer' : 'Je participe';
+    join.querySelector('svg').style.display = on ? 'none' : '';
+  });
+
+  // Palettes candidates (valeurs vérifiées : ratio de contraste WCAG >= 4,5:1 pour le texte)
+  const PALETTES = {
+    ocean: { name: 'Océan', note: "Bleu et orange : la paire de couleurs la plus facile à distinguer pour les personnes daltoniennes. Inspire confiance.",
+      light: { bg:'#F3F6FA', surface:'#FFFFFF', text:'#13233A', muted:'#4A5A70', border:'#D9E1EB', primary:'#0B5CAD', primarySoft:'#E1EDFA', onPrimary:'#FFFFFF', accent:'#F08A24', accentSoft:'#FDEBD8', accentInk:'#8A4300', onAccent:'#13233A', danger:'#B42318' },
+      dark:  { bg:'#0D1726', surface:'#16233A', text:'#EDF2F8', muted:'#A3B1C4', border:'#27374F', primary:'#6CB1F5', primarySoft:'#173456', onPrimary:'#0A1A2E', accent:'#F5A055', accentSoft:'#3B2A17', accentInk:'#F8C08A', onAccent:'#13233A', danger:'#F07A6E' } },
+    indigo: { name: 'Indigo & corail', note: "Plus moderne et énergique. Le corail donne un côté chaleureux et festif.",
+      light: { bg:'#F5F5FB', surface:'#FFFFFF', text:'#1C1B3A', muted:'#55547A', border:'#E0E0EE', primary:'#4338CA', primarySoft:'#E8E6FB', onPrimary:'#FFFFFF', accent:'#F0705A', accentSoft:'#FDE6E1', accentInk:'#9A2E1B', onAccent:'#1C1B3A', danger:'#B42318' },
+      dark:  { bg:'#12122A', surface:'#1C1C3C', text:'#EEEEFA', muted:'#AAA9CC', border:'#2E2E55', primary:'#A5A0FF', primarySoft:'#2B2860', onPrimary:'#12122A', accent:'#FF8E7A', accentSoft:'#3E2220', accentInk:'#FFB8AA', onAccent:'#1C1B3A', danger:'#F07A6E' } },
+    foret: { name: 'Forêt & soleil', note: "Ambiance nature et plein air. Attention : le vert et le rouge « Supprimer » se confondent pour certains daltoniens, d'où un texte toujours présent sur ce bouton.",
+      light: { bg:'#F4F6F2', surface:'#FFFFFF', text:'#17261C', muted:'#4D5D52', border:'#DCE3DA', primary:'#1E6B42', primarySoft:'#E0F0E5', onPrimary:'#FFFFFF', accent:'#F2BE3C', accentSoft:'#FBF0CF', accentInk:'#7A5600', onAccent:'#17261C', danger:'#B42318' },
+      dark:  { bg:'#0F1A14', surface:'#18271E', text:'#EDF3EE', muted:'#A6B8AB', border:'#2A3D31', primary:'#6DD39A', primarySoft:'#1C3B2A', onPrimary:'#0B1F13', accent:'#F5CA5C', accentSoft:'#3A3015', accentInk:'#F7D88A', onAccent:'#17261C', danger:'#F07A6E' } },
+    prune: { name: 'Prune & pêche', tag: 'Choisie', note: "Original et chaleureux, il se démarque des applis d'agenda classiques.",
+      light: { bg:'#F8F4F7', surface:'#FFFFFF', text:'#2A1730', muted:'#62506A', border:'#E8DDE6', primary:'#7A2E8E', primarySoft:'#F3E3F6', onPrimary:'#FFFFFF', accent:'#FF9466', accentSoft:'#FFE9DF', accentInk:'#9A3A10', onAccent:'#2A1730', danger:'#B42318' },
+      dark:  { bg:'#1A1020', surface:'#26182E', text:'#F6EEF7', muted:'#BBA8C2', border:'#3B2845', primary:'#D99BEA', primarySoft:'#3E2149', onPrimary:'#1A1020', accent:'#FFA680', accentSoft:'#41241A', accentInk:'#FFC2A8', onAccent:'#2A1730', danger:'#F07A6E' } },
+    teal: { name: 'Teal d\'origine', note: "La palette de la première maquette, gardée pour comparer. Elle échoue sur deux contrastes en mode clair.",
+      light: { bg:'#F4F6F7', surface:'#FFFFFF', text:'#1E2761', muted:'#5B6385', border:'#E2E6EA', primary:'#117F73', primarySoft:'#DDF0ED', onPrimary:'#FFFFFF', accent:'#F39C12', accentSoft:'#FDEFD6', accentInk:'#8A5300', onAccent:'#1E2761', danger:'#C0392B' },
+      dark:  { bg:'#0F1530', surface:'#1A2246', text:'#EEF1F8', muted:'#9AA3C4', border:'#2A3360', primary:'#2BB3A3', primarySoft:'#143A3E', onPrimary:'#06201D', accent:'#F5A623', accentSoft:'#3A2C12', accentInk:'#F8C46A', onAccent:'#1E2761', danger:'#E5675A' } },
+  };
+  // Paires vérifiées : [texte, fond, seuil, usage]
+  const PAIRS = [
+    ['text', 'bg', 4.5, 'Texte sur le fond'],
+    ['muted', 'surface', 4.5, 'Texte secondaire sur une carte'],
+    ['muted', 'bg', 4.5, 'Texte secondaire sur le fond'],
+    ['onPrimary', 'primary', 4.5, 'Texte des boutons'],
+    ['primary', 'surface', 4.5, 'Liens et onglet actif'],
+    ['primary', 'primarySoft', 4.5, 'Badge « Je participe »'],
+    ['accentInk', 'accentSoft', 4.5, 'Texte de la carte météo'],
+    ['onAccent', 'accent', 4.5, 'Icône du bouton +'],
+    ['accentInk', 'bg', 3, 'Points du calendrier'],
+    ['danger', 'surface', 4.5, 'Bouton Supprimer'],
+  ];
+  // Formule WCAG 2.x de la luminance relative et du ratio de contraste
+  function luminance(hex) {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16) / 255)
+      .map(v => v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4);
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+  }
+  function ratio(a, b) {
+    const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+    return (hi + 0.05) / (lo + 0.05);
+  }
+  const fmt = n => n.toFixed(2).replace('.', ',') + ':1';
+  const passesAll = p => ['light', 'dark'].every(m => PAIRS.every(([a, b, t]) => ratio(p[m][a], p[m][b]) >= t));
+
+  const palBox = document.getElementById('palettes');
+  palBox.innerHTML = Object.entries(PALETTES).map(([key, p]) => `
+    <button type="button" class="pal" data-pal="${key}" aria-pressed="false">
+      <span class="dots">${['primary', 'accent', 'text', 'primarySoft', 'bg'].map(k => `<i style="background:${p.light[k]}"></i>`).join('')}</span>
+      <b>${p.name}${p.tag ? ` <span class="tag">${p.tag}</span>` : ''}</b>
+      <span class="score ${passesAll(p) ? 'ok' : 'ko'}">${passesAll(p) ? 'WCAG AA ✓' : 'Échecs AA'}</span>
+      <small>${p.note}</small>
+    </button>`).join('');
+
+  function cell(fg, bg, t) {
+    const r = ratio(fg, bg);
+    return `<td class="num"><span class="sample" style="color:${fg};background:${bg}">Aa</span> ${fmt(r)}<span class="${r >= t ? 'pass' : 'fail'}">${r >= t ? 'OK' : 'Échec'}</span></td>`;
+  }
+  function setPalette(key) {
+    const p = PALETTES[key];
+    const root = document.documentElement.style;
+    for (const [k, v] of Object.entries(p.light)) root.setProperty(`--L-${k}`, v);
+    for (const [k, v] of Object.entries(p.dark)) root.setProperty(`--D-${k}`, v);
+    palBox.querySelectorAll('.pal').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.pal === key)));
+    document.querySelectorAll('[data-hex]').forEach(el => { el.textContent = p.light[el.dataset.hex]; });
+    document.getElementById('contrast-rows').innerHTML = PAIRS.map(([a, b, t, label]) =>
+      `<tr><td>${label}</td>${cell(p.light[a], p.light[b], t)}${cell(p.dark[a], p.dark[b], t)}</tr>`).join('');
+  }
+  palBox.addEventListener('click', e => { const b = e.target.closest('.pal'); if (b) setPalette(b.dataset.pal); });
+  // La maquette s'ouvre toujours sur la palette choisie
+  setPalette('prune');
+
+  // Bouton « Ajouter à mon agenda » : simule le retour après expo-calendar
+  const addCal = document.getElementById('add-cal');
+  addCal.addEventListener('click', () => {
+    const added = addCal.classList.toggle('joined');
+    addCal.classList.toggle('ghost', !added);
+    addCal.querySelector('span').textContent = added ? 'Ajouté à ton agenda' : 'Ajouter à mon agenda';
+  });
+
+  // Calendrier d'octobre 2026 : le 1er tombe un jeudi, semaine commençant le lundi
+  const cal = document.getElementById('cal');
+  const dows = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
+  const events = [4, 21, 22, 24];
+  const today = 19, selected = 21;
+  let html = dows.map(d => `<div class="dow">${d}</div>`).join('');
+  html += '<div class="d"></div>'.repeat(3);
+  for (let d = 1; d <= 31; d++) {
+    const cls = ['d'];
+    if (events.includes(d)) cls.push('ev');
+    if (d === today) cls.push('today');
+    if (d === selected) cls.push('sel');
+    if (d < today) cls.push('past');
+    html += `<div class="${cls.join(' ')}"><span>${d}</span></div>`;
+  }
+  cal.innerHTML = html;
+</script>
