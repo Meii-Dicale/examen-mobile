@@ -102,7 +102,7 @@ export const fr = {
   participation: {
     join: 'Je participe',
     joined: 'Tu participes',
-    // Événement passé : on peut encore indiquer qu'on y était (photos plus tard).
+    // Événement passé : on peut encore indiquer qu'on y était, pour y ajouter des photos.
     markAttended: "J'y ai participé",
     attended: 'Tu y as participé',
     cancelHint: 'Appuie pour annuler ta participation',
@@ -150,6 +150,28 @@ export const fr = {
     tooFar: 'La météo sera disponible 5 jours avant l’événement.',
     unavailable: 'Prévision indisponible pour cette heure.',
     error: 'Météo indisponible pour le moment.',
+  },
+  photos: {
+    title: 'Photos',
+    add: 'Ajouter',
+    addHint: 'Prends une photo ou choisis-en une dans ta galerie',
+    chooseTitle: 'Ajouter une photo',
+    camera: 'Prendre une photo',
+    library: 'Choisir dans la galerie',
+    empty: "Aucune photo pour l'instant.",
+    emptyCanAdd: "Aucune photo pour l'instant. Partage les tiennes !",
+    photoBy: (name: string) => `Photo de ${name}`,
+    mine: 'Ta photo',
+    mineHint: 'Appuie pour l’agrandir, appui long pour la supprimer',
+    openHint: 'Appuie pour l’agrandir',
+    close: 'Fermer la photo',
+    deleteTitle: 'Supprimer cette photo ?',
+    deleteMessage: 'Elle sera effacée de l’app. Cette action est définitive.',
+    cameraDeniedTitle: "Accès à l'appareil photo refusé",
+    cameraDeniedMessage:
+      "Autorise EventEase à utiliser l'appareil photo dans les réglages du téléphone, ou choisis une photo dans ta galerie.",
+    addError: "La photo n'a pas pu être ajoutée, réessaie.",
+    deleteError: "La photo n'a pas pu être supprimée, réessaie.",
   },
   profile: {
     title: 'Profil',

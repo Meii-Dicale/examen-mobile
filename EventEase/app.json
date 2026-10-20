@@ -51,6 +51,14 @@
         {
           "locationWhenInUsePermission": "EventEase utilise ta position pour afficher la distance jusqu'aux événements."
         }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "EventEase te laisse choisir des photos pour les partager sur les événements auxquels tu as participé.",
+          "cameraPermission": "EventEase utilise l'appareil photo pour ajouter des photos aux événements auxquels tu as participé.",
+          "microphonePermission": false
+        }
       ]
     ],
     "experiments": {
