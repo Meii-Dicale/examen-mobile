@@ -14,9 +14,11 @@ import { useTheme } from '@/context/ThemeContext';
 type Props = {
   /** Largeur en points. La hauteur suit (ticket de 80 × 60 : rapport 3/4). */
   size?: number;
+  /** Couleur du ticket : prune du thème par défaut, blanc sur un fond prune (splash). */
+  ticketColor?: string;
 };
 
-export function Logo({ size = 64 }: Props) {
+export function Logo({ size = 64, ticketColor }: Props) {
   const { colors } = useTheme();
 
   return (
@@ -33,7 +35,7 @@ export function Logo({ size = 64 }: Props) {
       {/* Le ticket : rectangle aux coins arrondis, avec une encoche de chaque côté. */}
       <Path
         d="M20 22 H80 A10 10 0 0 1 90 32 V44 A8 8 0 0 0 90 60 V72 A10 10 0 0 1 80 82 H20 A10 10 0 0 1 10 72 V60 A8 8 0 0 0 10 44 V32 A10 10 0 0 1 20 22 Z"
-        fill={colors.primary}
+        fill={ticketColor ?? colors.primary}
       />
       {/* La coche, couleur pêche. */}
       <Path
