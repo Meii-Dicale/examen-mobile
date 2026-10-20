@@ -237,6 +237,10 @@ Aucune valeur magique (`16`, `'#7A2E8E'`) dans les écrans : changer un espaceme
 - **Règle sur `main`** : pas de push direct, PR obligatoire, CI verte obligatoire, fusion en squash. **`main` fonctionne toujours.**
 - **TypeScript strict** : beaucoup d'erreurs sont détectées avant même de lancer l'app.
 - **Commentaires en français**, qui expliquent le *pourquoi* plutôt que le *quoi*.
+- **Pas de tests automatisés** : c'est un choix assumé, faute de temps sur 4 jours. Les vérifications sont faites par la CI (lint et typage) et par un scénario manuel sur Expo Go. Si on te demande ce que tu testerais en premier : les fonctions pures de `utils/` (distance Haversine, validation, dates).
+- **Livrables** :
+  - `docs/document-technique.md` : l'architecture en 10 points ;
+  - `docs/soutenance.html` : le diaporama. `N` affiche les notes d'orateur, `F` passe en plein écran.
 
 ---
 
