@@ -8,6 +8,7 @@ export const fr = {
   app: {
     name: 'EventEase',
     tagline: 'Les événements de ton association, au même endroit.',
+    loading: "Chargement d'EventEase",
   },
   common: {
     save: 'Enregistrer',

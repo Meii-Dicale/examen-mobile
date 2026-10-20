@@ -123,6 +123,21 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - **Accessibilité** : chaque vignette est lue « Photo de Camille Bernard » ou « Ta photo, appui long pour la supprimer ». La tuile « + » annonce son état « en cours » pendant l'ajout.
 - **Limites assumées** : les photos restent sur le téléphone (pas de serveur, donc pas de partage réel entre membres). Pas de recadrage ni de légende.
 
+**Logo, icône et splash** (feat/design-finitions)
+- **Logo B, le « ticket validé »** : un ticket d'entrée avec une coche pêche, pour « j'ai participé ». Il a été choisi parmi trois propositions dans la maquette.
+- **Dans l'app, c'est un SVG** (`components/common/Logo.tsx`, avec react-native-svg, inclus dans Expo Go). Il reste net à toutes les tailles et **prend les couleurs du thème** clair ou sombre. Une image PNG resterait figée.
+- **Les images natives sont générées** par `scripts/generate-icons.py` (Python + Pillow), avec **le même tracé** que le SVG. Pour modifier le logo, on change le tracé puis on relance une commande, au lieu de redessiner 7 images à la main.
+- **Icône adaptative Android** : le système découpe l'icône (cercle, goutte…) et ne garde que **66 % du centre**. Le logo y est donc plus petit, et le fond est une image séparée. Une version **monochrome** sert aux icônes thématiques d'Android 13.
+- **Splash clair et sombre** (`dark` dans le plugin `expo-splash-screen`) : fond prune en clair, fond `#1A1020` en sombre. Il n'y a pas de flash blanc au démarrage en mode sombre.
+- Le splash reste affiché **tant que les polices, la base et la session ne sont pas prêtes** (`preventAutoHideAsync` puis `hideAsync`).
+- **Deux splash qui se suivent** (même principe que le Pokédex) :
+  - le **natif** (`app.json`) est une image fixe, affichée avant que le JavaScript démarre. Expo Go le remplace par le sien ;
+  - l'**animé** (`components/common/AnimatedSplash.tsx`, Reanimated) prend le relais **avec la même couleur de fond**, donc on ne voit pas la transition. Le ticket apparaît avec un effet ressort, comme un tampon de validation, puis le nom et le slogan, puis tout s'efface au bout de 1,6 s.
+  - Comme c'est du React, il fonctionne aussi dans Expo Go.
+- **Le splash animé est accessible** : avec « Réduire les animations » activé sur le téléphone (`useReducedMotion`), il s'affiche sans mouvement. Le lecteur d'écran annonce « Chargement d'EventEase ».
+- **`scheduleOnRN`** : la fin d'animation s'exécute sur le thread UI (worklet). Pour modifier l'état React, on revient sur le thread JS.
+- **Limite Expo Go** : Expo Go affiche sa propre icône. La vraie icône n'apparaît que dans une build (`eas build`).
+
 **Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
 
 **Pourquoi `SectionList` et pas `.map()` ?** Elle ne rend que les cartes visibles (virtualisation), gère les sections « À venir / Passés » et le « tirer pour rafraîchir ».

@@ -16,8 +16,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { SQLiteProvider } from 'expo-sqlite';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
+import { AnimatedSplash } from '@/components/common/AnimatedSplash';
 import { AuthProvider, useAuth } from '@/context/AuthContext';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { DATABASE_NAME, migrateDbIfNeeded } from '@/db/schema';
@@ -49,8 +50,12 @@ function RootStack() {
   // On attend aussi la session : sinon l'écran de connexion clignoterait
   // une fraction de seconde avant d'afficher l'app d'une personne déjà connectée.
   const ready = fontsReady && !isLoading;
+  // Splash animé (JavaScript) : il prend le relais du splash natif, puis s'efface.
+  const [splashDone, setSplashDone] = useState(false);
+  const hideSplash = useCallback(() => setSplashDone(true), []);
 
   useEffect(() => {
+    // Le splash natif se cache au moment où le splash animé, de même couleur, s'affiche.
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
 
@@ -73,6 +78,8 @@ function RootStack() {
           <Stack.Screen name="(app)" />
         </Stack.Protected>
       </Stack>
+      {/* Dessiné APRÈS la Stack : il est au-dessus, le temps de s'effacer. */}
+      {splashDone ? null : <AnimatedSplash onFinish={hideSplash} />}
     </>
   );
 }
