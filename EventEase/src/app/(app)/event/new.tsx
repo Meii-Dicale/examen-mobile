@@ -11,7 +11,7 @@ export default function NewEvent() {
 
   return (
     <EventForm
-      initial={{ title: '', description: '', date: defaultEventDate(), locationName: null }}
+      initial={{ title: '', description: '', date: defaultEventDate(), locationName: null, latitude: null, longitude: null }}
       isNew
       submitLabel={fr.eventForm.create}
       onSubmit={async (input) => {

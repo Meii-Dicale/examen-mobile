@@ -45,6 +45,12 @@
         {
           "calendarPermission": "EventEase ajoute les événements auxquels tu participes à ton agenda, avec un rappel."
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "EventEase utilise ta position pour afficher la distance jusqu'aux événements."
+        }
       ]
     ],
     "experiments": {

@@ -17,6 +17,7 @@ export function useEventActions() {
   const userId = useCurrentUserId();
 
   return {
+    // Les coordonnées du lieu arrivent déjà dans `input` (trouvées par le formulaire).
     create: (input: EventInput) => createEvent(db, userId, input),
     update: (id: number, input: EventInput) => updateEvent(db, userId, id, input),
     remove: (id: number) => deleteEvent(db, userId, id),

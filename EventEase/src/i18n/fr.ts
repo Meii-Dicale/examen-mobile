@@ -88,6 +88,10 @@ export const fr = {
     time: 'Heure',
     location: 'Lieu (facultatif)',
     locationPlaceholder: "Parc de la Tête d'Or, Lyon",
+    placeSearching: 'Recherche du lieu…',
+    placeFound: (label: string) => `Lieu reconnu : ${label}. Ce n'est pas le bon ? Précise la ville.`,
+    placeFoundNoLabel: 'Lieu reconnu.',
+    placeNotFound: 'Lieu introuvable : la distance ne sera pas affichée.',
     create: "Créer l'événement",
     errorTitleRequired: 'Donne un titre à l’événement.',
     errorTitleLength: 'Le titre doit faire 80 caractères maximum.',
@@ -131,6 +135,11 @@ export const fr = {
     deniedMessage: "Autorise EventEase à accéder à ton agenda dans les réglages du téléphone, puis réessaie.",
     openSettings: 'Ouvrir les réglages',
     error: "L'ajout à l'agenda a échoué, réessaie.",
+  },
+  location: {
+    // « 2,3 km » est construit par formatDistance.
+    distance: (distance: string) => `à ${distance}`,
+    distanceFromYou: (distance: string) => `À ${distance} de toi`,
   },
   profile: {
     title: 'Profil',

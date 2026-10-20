@@ -97,11 +97,14 @@ export async function getEvent(db: SQLiteDatabase, userId: number, id: number): 
 /** Crée l'événement et renvoie son id. */
 export async function createEvent(db: SQLiteDatabase, userId: number, input: EventInput): Promise<number> {
   const result = await db.runAsync(
-    'INSERT INTO events (title, description, date, location_name, created_by) VALUES (?, ?, ?, ?, ?)',
+    `INSERT INTO events (title, description, date, location_name, latitude, longitude, created_by)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     input.title.trim(),
     input.description.trim(),
     input.date,
     input.locationName?.trim() || null,
+    input.latitude,
+    input.longitude,
     userId,
   );
   return result.lastInsertRowId;
@@ -110,12 +113,14 @@ export async function createEvent(db: SQLiteDatabase, userId: number, input: Eve
 export async function updateEvent(db: SQLiteDatabase, userId: number, id: number, input: EventInput): Promise<void> {
   const result = await db.runAsync(
     `UPDATE events
-     SET title = ?, description = ?, date = ?, location_name = ?, updated_at = ${NOW}
+     SET title = ?, description = ?, date = ?, location_name = ?, latitude = ?, longitude = ?, updated_at = ${NOW}
      WHERE id = ? AND created_by = ?`,
     input.title.trim(),
     input.description.trim(),
     input.date,
     input.locationName?.trim() || null,
+    input.latitude,
+    input.longitude,
     id,
     userId,
   );
