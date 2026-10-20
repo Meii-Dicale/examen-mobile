@@ -10,7 +10,6 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 
 import { NOW } from '@/db/schema';
 import type { Event, EventInput } from '@/types/event';
-import type { Coordinates } from '@/types/location';
 
 /** L'événement n'existe pas, ou l'utilisateur n'en est pas le créateur. */
 export class EventNotFoundError extends Error {
@@ -95,16 +94,8 @@ export async function getEvent(db: SQLiteDatabase, userId: number, id: number): 
   return row ? toEvent(row) : null;
 }
 
-/**
- * Crée l'événement et renvoie son id.
- * `coords` : position du lieu, calculée avant par géocodage (null si inconnue).
- */
-export async function createEvent(
-  db: SQLiteDatabase,
-  userId: number,
-  input: EventInput,
-  coords: Coordinates | null,
-): Promise<number> {
+/** Crée l'événement et renvoie son id. */
+export async function createEvent(db: SQLiteDatabase, userId: number, input: EventInput): Promise<number> {
   const result = await db.runAsync(
     `INSERT INTO events (title, description, date, location_name, latitude, longitude, created_by)
      VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -112,20 +103,14 @@ export async function createEvent(
     input.description.trim(),
     input.date,
     input.locationName?.trim() || null,
-    coords?.latitude ?? null,
-    coords?.longitude ?? null,
+    input.latitude,
+    input.longitude,
     userId,
   );
   return result.lastInsertRowId;
 }
 
-export async function updateEvent(
-  db: SQLiteDatabase,
-  userId: number,
-  id: number,
-  input: EventInput,
-  coords: Coordinates | null,
-): Promise<void> {
+export async function updateEvent(db: SQLiteDatabase, userId: number, id: number, input: EventInput): Promise<void> {
   const result = await db.runAsync(
     `UPDATE events
      SET title = ?, description = ?, date = ?, location_name = ?, latitude = ?, longitude = ?, updated_at = ${NOW}
@@ -134,8 +119,8 @@ export async function updateEvent(
     input.description.trim(),
     input.date,
     input.locationName?.trim() || null,
-    coords?.latitude ?? null,
-    coords?.longitude ?? null,
+    input.latitude,
+    input.longitude,
     id,
     userId,
   );

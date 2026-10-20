@@ -55,3 +55,21 @@ export async function geocodePlace(place: string): Promise<Coordinates | null> {
     return null;
   }
 }
+
+/**
+ * Description lisible d'un point (« Lyon, France »), par géocodage inverse.
+ * Sert à montrer dans le formulaire le lieu que le géocodeur a COMPRIS : il ne répond
+ * presque jamais « introuvable » et renvoie souvent le lieu le plus ressemblant,
+ * parfois à l'autre bout du monde. Seul l'utilisateur peut juger si c'est le bon.
+ */
+export async function describePlace(coords: Coordinates): Promise<string | null> {
+  try {
+    const [address] = await Location.reverseGeocodeAsync(coords);
+    if (!address) return null;
+    const town = address.city ?? address.subregion ?? address.region;
+    // filter(Boolean) retire les morceaux absents (null).
+    return [town, address.country].filter(Boolean).join(', ') || null;
+  } catch {
+    return null;
+  }
+}

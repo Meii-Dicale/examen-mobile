@@ -27,4 +27,7 @@ export type EventInput = {
   description: string;
   date: string;
   locationName: string | null;
+  /** Coordonnées du lieu, trouvées par le formulaire (null si pas de lieu ou introuvable). */
+  latitude: number | null;
+  longitude: number | null;
 };

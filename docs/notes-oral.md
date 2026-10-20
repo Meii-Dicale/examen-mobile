@@ -83,8 +83,9 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 
 **Localisation et distance** (feat/location)
 - **Deux usages d'`expo-location`** : la position du téléphone (`getUserPosition`) et le **géocodage** du lieu saisi (`geocodePlace` : « Place Bellecour, Lyon » → latitude/longitude). Le géocodeur est celui du système (Apple ou Google) : pas de clé d'API, mais il faut du réseau.
-- **Géocodage à l'enregistrement, pas à l'affichage** : on calcule les coordonnées une fois, dans `useEventActions.create/update`, et on les stocke dans `events.latitude/longitude`. L'affichage n'a plus qu'un calcul mathématique à faire, sans réseau.
-- **Modification** : si le lieu n'a pas changé, on garde les coordonnées existantes, sans nouvelle requête.
+- **Géocodage dans le formulaire, pas à l'affichage** : quand on quitte le champ « Lieu », le hook `usePlaceLookup` géocode le texte et affiche « Lieu reconnu : Lyon, France » (géocodage **inverse**, `reverseGeocodeAsync`). Les coordonnées sont stockées dans `events.latitude/longitude` : l'affichage n'a plus qu'un calcul mathématique à faire, sans réseau.
+- **Pas de double requête** : à l'envoi, `lookup` renvoie le résultat déjà trouvé. En modification, si le lieu n'a pas changé, on garde les coordonnées existantes.
+- **Ref plutôt qu'état** dans `usePlaceLookup` : on appuie sur « Enregistrer » juste après avoir quitté le champ, avant que React ait refait un rendu. Une ref est à jour immédiatement, un état non. Les réponses périmées (texte modifié entre-temps) sont ignorées.
 - **Échec = pas de distance, jamais d'erreur** : lieu introuvable, pas de réseau ou permission refusée → l'événement est enregistré quand même, et la distance est simplement masquée. Les fonctions du service renvoient `null` au lieu de lever une erreur.
 - **Haversine** (`utils/distance.ts`) : distance « à vol d'oiseau » sur une sphère de 6 371 km, pas le trajet routier. Fonction pure, testable sans téléphone (Bellecour → Tête d'Or ≈ 2,8 km, Lyon → Paris ≈ 392 km).
 - **Affichage** : « 350 m » sous 1 km (arrondi à 10 m, la position n'est pas plus précise), « 2,3 km » sous 10 km, puis « 12 km ». `toLocaleString('fr-FR')` met la virgule décimale.
@@ -92,7 +93,7 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - **Permission « pendant l'utilisation »** seulement (`requestForegroundPermissionsAsync`) : l'app n'a jamais besoin de suivre la personne en arrière-plan. Principe de **minimisation des données** (RGPD) : la position n'est ni stockée ni envoyée, elle reste en mémoire.
 - **Précision `Balanced`** (~100 m) et `getLastKnownPositionAsync` d'abord : plus rapide et moins gourmand en batterie que le GPS fin, largement suffisant pour une distance en km.
 - **Android** : le géocodage exige la permission de localisation (pas iOS), d'où le `Platform.OS === 'android'` dans `geocodePlace`.
-- **Limites assumées** : position lue une fois par session (pas de suivi en temps réel) ; le géocodage peut se tromper sur un lieu ambigu (« Mairie ») : on prend le premier résultat.
+- **Limites assumées** : position lue une fois par session (pas de suivi en temps réel). Le géocodage peut se tromper sur un lieu ambigu ou farfelu : on prend le premier résultat, mais on l'affiche pour que l'utilisateur le vérifie.
 
 **Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
 
@@ -223,6 +224,12 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 - *Solution* : le service importe `expo-calendar/legacy`. On teste sur le téléphone sans *development build*. Le choix est isolé dans `services/deviceCalendar.ts` : passer à la nouvelle API ne toucherait que ce fichier.
 - *Leçon* : vérifier la compatibilité Expo Go **avant** de choisir une API native, et garder le code natif derrière un service.
 
+**« Zzzzz » à 1 611 km** (feat/location)
+- *Symptôme* : un événement créé avec le lieu « Zzzzz » affichait une distance de 1 611 km au lieu de rien.
+- *Cause* : le géocodeur du système (Apple ou Google) ne répond presque jamais « introuvable » : il renvoie le lieu le plus ressemblant, même à l'autre bout de l'Europe. Le code ne peut pas savoir si c'est le bon.
+- *Solution* : rendre le résultat **visible**. En quittant le champ, le formulaire affiche « Lieu reconnu : Ville, Pays » grâce au géocodage inverse. Si ce n'est pas le bon, on précise la ville avant d'enregistrer.
+- *Leçon* : un service externe peut répondre « avec succès » quelque chose de faux. Quand on ne peut pas le vérifier dans le code, on montre le résultat à l'utilisateur.
+
 **Le mauvais projet ouvert dans Expo Go**
 - Sur le Wi-Fi de l'école, Expo Go ouvrait le serveur d'un camarade.
 - *Solution* : le partage de connexion du téléphone, qui crée un réseau isolé.
@@ -251,7 +258,8 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Pourquoi `expo-calendar/legacy` et pas la nouvelle API ? | La nouvelle API orientée objet n'est pas incluse dans Expo Go en SDK 57. La version legacy l'est, et elle est toujours documentée. Tout est dans un seul service : migrer ne toucherait qu'un fichier. |
 | Que se passe-t-il si j'appuie deux fois sur « Je participe » ? | La clé primaire composite interdit le doublon, et `INSERT OR IGNORE` ignore la seconde insertion sans erreur. Le bouton est aussi désactivé pendant l'enregistrement. |
 | Comment calcules-tu la distance ? | Formule de Haversine entre ma position et les coordonnées du lieu : distance à vol d'oiseau sur une sphère de 6 371 km. Fonction pure dans `utils/distance.ts`. |
-| D'où viennent les coordonnées du lieu ? | Du géocodage (`Location.geocodeAsync`) au moment d'enregistrer l'événement. Elles sont stockées en base : l'affichage ne refait pas d'appel réseau. |
+| D'où viennent les coordonnées du lieu ? | Du géocodage (`Location.geocodeAsync`), lancé quand on quitte le champ « Lieu ». Le formulaire affiche le lieu compris, puis les coordonnées sont stockées en base : l'affichage ne refait pas d'appel réseau. |
+| Et si le géocodeur se trompe de lieu ? | C'est arrivé (« Zzzzz » → 1 611 km). Le formulaire affiche « Lieu reconnu : Ville, Pays » (géocodage inverse) : l'utilisateur voit l'erreur et précise la ville avant d'enregistrer. |
 | Stockes-tu la position de l'utilisateur ? | Non. Elle reste en mémoire (Context), n'est ni enregistrée ni envoyée, et seule la permission « pendant l'utilisation » est demandée. |
 | Pourquoi un Context pour la position ? | Plusieurs écrans affichent des distances. Le Context la demande une fois pour tous, au lieu d'interroger le GPS pour chaque carte. |
 | Pourquoi « 3 personnes participent » et pas « participants » ? | C'est une formulation neutre, sans accord au genre, qui gère aussi le pluriel et le passé. |
