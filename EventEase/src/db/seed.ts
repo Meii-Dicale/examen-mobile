@@ -9,6 +9,10 @@
  * Les dates sont calculées à partir d'aujourd'hui, pour qu'il y ait toujours :
  * des événements dans moins de 5 jours (météo disponible), des événements plus
  * lointains, et des événements passés auxquels le compte démo a participé (photos).
+ *
+ * Les événements sont volontairement humoristiques, pour une démo plus vivante.
+ * Le seed ne tourne qu'à la création de la base : pour voir une modification,
+ * il faut repartir d'une base neuve (supprimer les données de l'app ou d'Expo Go).
  */
 
 import type { SQLiteDatabase } from 'expo-sqlite';
@@ -74,8 +78,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   const camille = await insertUser(db, 'camille@eventease.fr', 'Camille Bernard');
 
   const picnic = await insertEvent(db, {
-    title: 'Pique-nique de rentrée',
-    description: "Chacun apporte un plat à partager. On accueille les nouveaux membres de l'association.",
+    title: 'Pique-nique sans fourmis (on essaie)',
+    description:
+      "Chacun apporte un plat à partager. Les fourmis n'ont pas été invitées, mais elles viennent tous les ans.",
     date: daysFromNow(2, 12),
     locationName: "Parc de la Tête d'Or, Lyon",
     latitude: 45.7772,
@@ -84,8 +89,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   await insertEvent(db, {
-    title: 'Atelier vélo solidaire',
-    description: 'Réparation gratuite de vélos avec des bénévoles. Outils fournis, venez avec votre vélo.',
+    title: 'Championnat de lancer de chaussettes orphelines',
+    description:
+      'Ramène tes chaussettes sans partenaire. Record à battre : 14 mètres, vent dans le dos. Elles finissent ensuite à la ressourcerie.',
     date: daysFromNow(4, 14),
     locationName: 'Place Bellecour, Lyon',
     latitude: 45.7578,
@@ -94,8 +100,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   await insertEvent(db, {
-    title: 'Collecte de vêtements',
-    description: "Dépôt de vêtements chauds pour l'hiver, redistribués par une association partenaire.",
+    title: 'Atelier : plier un drap-housse',
+    description:
+      'Enfin la vérité sur le pliage du drap-housse. Deux bénévoles expérimentés, aucune garantie de résultat.',
     date: daysFromNow(12, 10),
     locationName: 'Mairie du 7e arrondissement, Lyon',
     latitude: 45.7456,
@@ -104,8 +111,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   await insertEvent(db, {
-    title: 'Soirée jeux de société',
-    description: 'Jeux de plateau et de cartes pour tous les âges. Boissons et gâteaux sur place.',
+    title: 'Soirée Monopoly sans dispute',
+    description:
+      'Objectif : finir une partie sans fâcher personne. Une médiatrice est présente, les billets sont comptés à l’avance.',
     date: daysFromNow(25, 19),
     locationName: 'Croix-Rousse, Lyon',
     latitude: 45.7745,
@@ -114,8 +122,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   const cleanup = await insertEvent(db, {
-    title: 'Nettoyage des berges du Rhône',
-    description: 'Ramassage des déchets le long des quais. Gants et sacs fournis.',
+    title: 'Chasse au trésor sur les berges du Rhône',
+    description:
+      "On ramasse les déchets le long des quais. Un trophée récompense la trouvaille la plus improbable (l'an dernier : un grille-pain).",
     date: daysFromNow(-6, 9, 30),
     locationName: 'Berges du Rhône, Lyon',
     latitude: 45.7597,
@@ -124,8 +133,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   const assembly = await insertEvent(db, {
-    title: 'Assemblée générale',
-    description: "Bilan de l'année, vote du budget et élection du bureau.",
+    title: 'Assemblée générale (avec croissants)',
+    description:
+      "Bilan de l'année, vote du budget et élection du bureau. Des croissants sont promis pour atteindre le quorum.",
     date: daysFromNow(-20, 18, 30),
     locationName: 'Hôtel de Ville, Lyon',
     latitude: 45.7676,
