@@ -95,6 +95,18 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - **Android** : le géocodage exige la permission de localisation (pas iOS), d'où le `Platform.OS === 'android'` dans `geocodePlace`.
 - **Limites assumées** : position lue une fois par session (pas de suivi en temps réel). Le géocodage peut se tromper sur un lieu ambigu ou farfelu : on prend le premier résultat, mais on l'affiche pour que l'utilisateur le vérifie.
 
+**Météo** (feat/weather)
+- **API** : OpenWeather « 5 day / 3 hour forecast » (`/data/2.5/forecast`), gratuite : une prévision par créneau de 3 h, sur 5 jours. Paramètres `lat`, `lon` (les coordonnées du géocodage), `units=metric` (°C, m/s) et `lang=fr` (descriptions en français).
+- **Le bon créneau** : `pickClosestSlot` prend le créneau le plus proche de l'heure de l'événement (à 3 h près, sinon « indisponible »). Fonction pure, testable sans réseau.
+- **Pas d'appel inutile** : `forecastAvailability` décide AVANT le fetch. Événement passé ou sans coordonnées : carte masquée. Plus de 5 jours : « La météo sera disponible 5 jours avant l'événement. »
+- **`fetch` ne lève pas d'erreur sur un 401 ou un 500** : il faut tester `response.ok`, sinon on lirait une réponse d'erreur comme une prévision.
+- **AbortController** (comme dans le Pokédex) : si on quitte l'écran avant la réponse, la requête est annulée et on n'écrit pas dans l'état d'un écran disparu.
+- **Le hook `useWeather`** ne fait pas de `setState` au début de l'effet (règle du React Compiler). Le résultat est rangé avec sa **clé** (lieu + date) : si la clé actuelle ne correspond pas au résultat, c'est que ça charge. Modifier le lieu relance donc la requête tout seul.
+- **Conversions** : vent en m/s → km/h (× 3,6) ; probabilité de pluie `pop` de 0 à 1 → pourcentage.
+- **Icônes** : le code OpenWeather (« 10d ») est traduit en icône Feather (`cloud-rain`). Pas d'image téléchargée : l'icône prend la couleur du thème et marche hors ligne.
+- **Accessibilité** : la carte est lue en une phrase (« Météo prévue à 18:00, 14 degrés, Nuageux · vent 12 km/h »). Couleurs `accentSoft` + `accentInk` : contraste AA vérifié dans la maquette.
+- **Uniquement sur le détail** : sur la liste, il faudrait un appel par carte. Une seule requête, quand on ouvre l'événement.
+
 **Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
 
 **Pourquoi `SectionList` et pas `.map()` ?** Elle ne rend que les cartes visibles (virtualisation), gère les sections « À venir / Passés » et le « tirer pour rafraîchir ».
@@ -157,7 +169,9 @@ Aucune valeur magique (`16`, `'#7A2E8E'`) dans les écrans : changer un espaceme
 - Pourquoi les deux ? Masquer un bouton n'est pas une sécurité : un lien direct vers `/event/3/edit` contournerait l'interface. C'est le principe « ne jamais faire confiance au client ». Sur un vrai back-end, cette vérification serait côté serveur.
 - Testé avec sqlite3 : une modification par Camille d'un événement d'Alex donne `changes = 0`.
 
-**Les secrets** : la clé OpenWeather est dans `.env`, exclu par le `.gitignore` : elle n'est jamais commitée. La checklist de chaque PR le vérifie.
+**Les secrets** : la clé OpenWeather est dans `.env`, exclu par le `.gitignore` : elle n'est jamais commitée. La checklist de chaque PR le vérifie. Un `.env.example` (versionné, sans valeur) montre quelle variable créer.
+- **Limite à connaître** : une variable `EXPO_PUBLIC_…` est **intégrée au code de l'app** au moment du build. Quelqu'un de motivé pourrait la retrouver dans l'application installée. Le `.gitignore` protège le dépôt, pas l'app.
+- **En production**, l'app appellerait **mon serveur**, qui garderait la clé secrète et appellerait OpenWeather (avec un cache et une limite de requêtes). Pour un prototype avec une clé gratuite, c'est un risque accepté.
 
 **Navigation protégée : `Stack.Protected`**
 - Dans le layout racine, le groupe `(auth)` n'existe que si `!user`, et `(app)` que si `user` existe.
@@ -262,6 +276,10 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Et si le géocodeur se trompe de lieu ? | C'est arrivé (« Zzzzz » → 1 611 km). Le formulaire affiche « Lieu reconnu : Ville, Pays » (géocodage inverse) : l'utilisateur voit l'erreur et précise la ville avant d'enregistrer. |
 | Stockes-tu la position de l'utilisateur ? | Non. Elle reste en mémoire (Context), n'est ni enregistrée ni envoyée, et seule la permission « pendant l'utilisation » est demandée. |
 | Pourquoi un Context pour la position ? | Plusieurs écrans affichent des distances. Le Context la demande une fois pour tous, au lieu d'interroger le GPS pour chaque carte. |
+| Pourquoi la météo n'apparaît pas pour un événement dans 10 jours ? | L'API gratuite ne prévoit que 5 jours. On le sait avant d'appeler : pas de requête inutile, et un message explique quand elle sera disponible. |
+| Ta clé API est-elle protégée ? | Elle n'est pas dans le dépôt (`.env` ignoré). Mais une variable `EXPO_PUBLIC_` est intégrée à l'app : en production, je passerais par un serveur qui garde la clé. |
+| Que se passe-t-il sans réseau ? | Le `fetch` échoue, l'erreur est attrapée et la carte affiche « Météo indisponible pour le moment ». Le reste de l'écran (données SQLite locales) fonctionne. |
+| Comment choisis-tu la prévision parmi les 40 créneaux ? | Le créneau dont l'heure est la plus proche de celle de l'événement, à 3 h près. |
 | Pourquoi « 3 personnes participent » et pas « participants » ? | C'est une formulation neutre, sans accord au genre, qui gère aussi le pluriel et le passé. |
 | Pourquoi des hooks personnalisés ? | Pour séparer la logique (chargement, erreurs) de l'affichage, et la réutiliser sur plusieurs écrans. |
 | `useEffect` : à quoi sert la fonction renvoyée ? | C'est le nettoyage : elle s'exécute quand l'écran est démonté ou avant le prochain effet (annuler un minuteur, ignorer une requête en cours). |
