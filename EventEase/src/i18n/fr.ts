@@ -165,6 +165,7 @@ export const fr = {
     mineHint: 'Appuie pour l’agrandir, appui long pour la supprimer',
     openHint: 'Appuie pour l’agrandir',
     close: 'Fermer la photo',
+    closeHint: 'Appuie pour fermer',
     deleteTitle: 'Supprimer cette photo ?',
     deleteMessage: 'Elle sera effacée de l’app. Cette action est définitive.',
     cameraDeniedTitle: "Accès à l'appareil photo refusé",

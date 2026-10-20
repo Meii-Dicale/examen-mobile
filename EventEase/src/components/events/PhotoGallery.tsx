@@ -114,17 +114,19 @@ function PhotoViewer({ photo, onClose }: ViewerProps) {
     <Modal visible={photo != null} animationType="fade" onRequestClose={onClose} statusBarTranslucent>
       <View style={styles.viewer}>
         {photo ? (
-          <>
-            <Image
-              source={photo.uri}
-              style={styles.fill}
-              contentFit="contain"
-              accessibilityLabel={t.photoBy(photo.authorName)}
-            />
+          // Toucher la photo n'importe où la ferme : on ne reste jamais bloqué·e en plein écran.
+          <Pressable
+            onPress={onClose}
+            style={styles.fill}
+            accessibilityRole="button"
+            accessibilityLabel={t.photoBy(photo.authorName)}
+            accessibilityHint={t.closeHint}
+          >
+            <Image source={photo.uri} style={styles.fill} contentFit="contain" />
             <Text style={[typography.caption, styles.author, { bottom: insets.bottom + spacing.lg }]}>
               {t.photoBy(photo.authorName)}
             </Text>
-          </>
+          </Pressable>
         ) : null}
         <Pressable
           onPress={onClose}
@@ -155,12 +157,24 @@ const styles = StyleSheet.create({
   center: { textAlign: 'center' },
   viewer: { flex: 1, backgroundColor: '#000000' },
   fill: { flex: 1 },
-  author: { position: 'absolute', left: spacing.lg, right: spacing.lg, color: '#FFFFFF', textAlign: 'center' },
+  author: {
+    position: 'absolute',
+    left: spacing.lg,
+    right: spacing.lg,
+    color: '#FFFFFF',
+    textAlign: 'center',
+    // Ombre du texte : lisible même sur une zone claire de la photo.
+    textShadowColor: '#000000',
+    textShadowRadius: 4,
+  },
+  // Fond sombre rond : la croix blanche reste visible même sur un ciel ou un mur blanc.
   close: {
     position: 'absolute',
     right: spacing.md,
     width: touchTarget,
     height: touchTarget,
+    borderRadius: radius.pill,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
   },

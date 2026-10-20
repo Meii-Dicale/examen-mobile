@@ -260,6 +260,12 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 - *Solution* : rendre le résultat **visible**. En quittant le champ, le formulaire affiche « Lieu reconnu : Ville, Pays » grâce au géocodage inverse. Si ce n'est pas le bon, on précise la ville avant d'enregistrer.
 - *Leçon* : un service externe peut répondre « avec succès » quelque chose de faux. Quand on ne peut pas le vérifier dans le code, on montre le résultat à l'utilisateur.
 
+**Bloqué·e sur la photo en plein écran** (feat/photos)
+- *Symptôme* : après avoir touché une photo, elle s'ouvrait en grand et on ne pouvait plus rien faire.
+- *Cause* : la croix de fermeture était blanche, sans fond. Une photo en portrait remplit tout l'écran : la croix se retrouvait sur une zone claire de la photo et devenait invisible.
+- *Correction* : un fond sombre rond derrière la croix, et toucher la photo n'importe où la ferme. Le bouton retour d'Android fonctionnait déjà (`onRequestClose`).
+- *Leçon* : tester avec de vraies photos, pas seulement des images sombres. Toujours prévoir plusieurs façons de sortir d'un écran plein écran.
+
 **Le mauvais projet ouvert dans Expo Go**
 - Sur le Wi-Fi de l'école, Expo Go ouvrait le serveur d'un camarade.
 - *Solution* : le partage de connexion du téléphone, qui crée un réseau isolé.
