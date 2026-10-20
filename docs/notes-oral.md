@@ -61,7 +61,7 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - Pas de lignes en double : la clé primaire `(user_id, event_id)` garantit au plus une participation par personne. Vérifié avec sqlite3.
 - *Évolution* : la première version utilisait `EXISTS (…)`. Je suis passé·e au `LEFT JOIN` quand il a fallu lire aussi une colonne de la participation.
 - La clé primaire `(user_id, event_id)` interdit les doublons. `INSERT OR IGNORE` rend un double appui sans effet.
-- On peut aussi indiquer sa participation à un événement **passé** (« J'y ai participé »), ce qui ouvrira l'ajout de photos.
+- On peut aussi indiquer sa participation à un événement **passé** (« J'y ai participé »), ce qui permet d'y ajouter des photos.
 - Après un appui, on **relit** l'événement en base plutôt que de modifier l'état à la main : le bouton et le compteur restent forcément cohérents avec la base.
 
 **`useCurrentUserId` et la déconnexion** (piège évité)
@@ -106,6 +106,22 @@ Expo Router est construit **sur** React Navigation. Il ajoute le routage par fic
 - **Icônes** : le code OpenWeather (« 10d ») est traduit en icône Feather (`cloud-rain`). Pas d'image téléchargée : l'icône prend la couleur du thème et marche hors ligne.
 - **Accessibilité** : la carte est lue en une phrase (« Météo prévue à 18:00, 14 degrés, Nuageux · vent 12 km/h »). Couleurs `accentSoft` + `accentInk` : contraste AA vérifié dans la maquette.
 - **Uniquement sur le détail** : sur la liste, il faudrait un appel par carte. Une seule requête, quand on ouvre l'événement.
+
+**Photos** (feat/photos, bonus personnel)
+- **Règle** : on ajoute des photos à un événement **passé** auquel on a **participé**. Tout le monde voit les photos ; seul l'auteur peut supprimer les siennes (appui long).
+- **Deux services séparés** : `photoFiles.ts` gère les **fichiers** (expo-image-picker, expo-file-system), `photos.ts` gère la **base** (SQL). `useEventActions.addPhoto` les enchaîne : choisir → copier → enregistrer.
+- **Pourquoi copier le fichier ?** Le sélecteur renvoie un fichier **temporaire** (cache) que le système peut effacer. On le copie dans le dossier **document** de l'app, jamais vidé par le système, sous un nom unique (UUID).
+- **Chemin relatif en base** (`photos/1b9d….jpg`) : sur iOS, le chemin absolu du dossier de l'app change à chaque mise à jour. `photoUri()` reconstruit l'adresse complète à l'affichage.
+- **Galerie sans permission** : le sélecteur du système ne donne à l'app **que** la photo choisie. Seul l'appareil photo demande une permission ; si elle est refusée, une `Alert` propose les réglages ou la galerie.
+- **`quality: 0.7`** : compression JPEG, une photo passe d'environ 4 Mo à 500 Ko.
+- **La base vérifie la règle** (comme pour la modification d'un événement) : `INSERT … SELECT … JOIN participations … WHERE e.date < maintenant`. Si je n'ai pas participé ou si l'événement est à venir, le `SELECT` ne renvoie rien, donc 0 ligne insérée → erreur. Testé avec sqlite3 (passé + participant : 1 ; à venir : 0 ; non participant : 0).
+- **`DELETE … RETURNING uri`** : supprime la ligne **et** renvoie le chemin du fichier en une requête. `AND user_id = ?` : supprimer la photo de quelqu'un d'autre ne fait rien (testé : 0 ligne).
+- **Pas de fichier orphelin** :
+  - si l'insertion en base échoue, le fichier copié est supprimé ;
+  - `ON DELETE CASCADE` supprime les **lignes** des photos avec l'événement, mais pas les **fichiers**. `remove` lit donc les chemins **avant** de supprimer l'événement, puis efface les fichiers après.
+- **Affichage** : `FlatList` horizontale (virtualisée) avec `expo-image` (cache, transition, `contentFit`). Appui : plein écran dans une `Modal` (fond noir, bouton Fermer sous l'encoche grâce à `useSafeAreaInsets`, bouton retour Android via `onRequestClose`).
+- **Accessibilité** : chaque vignette est lue « Photo de Camille Bernard » ou « Ta photo, appui long pour la supprimer ». La tuile « + » annonce son état « en cours » pendant l'ajout.
+- **Limites assumées** : les photos restent sur le téléphone (pas de serveur, donc pas de partage réel entre membres). Pas de recadrage ni de légende.
 
 **Règle des hooks** : dans le Profil, `useMyParticipations()` est appelé **avant** le `if (!user) return null`. React exige que les hooks soient appelés dans le même ordre à chaque rendu, jamais après un `return` conditionnel.
 
@@ -244,6 +260,12 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 - *Solution* : rendre le résultat **visible**. En quittant le champ, le formulaire affiche « Lieu reconnu : Ville, Pays » grâce au géocodage inverse. Si ce n'est pas le bon, on précise la ville avant d'enregistrer.
 - *Leçon* : un service externe peut répondre « avec succès » quelque chose de faux. Quand on ne peut pas le vérifier dans le code, on montre le résultat à l'utilisateur.
 
+**Bloqué·e sur la photo en plein écran** (feat/photos)
+- *Symptôme* : après avoir touché une photo, elle s'ouvrait en grand et on ne pouvait plus rien faire.
+- *Cause* : la croix de fermeture était blanche, sans fond. Une photo en portrait remplit tout l'écran : la croix se retrouvait sur une zone claire de la photo et devenait invisible.
+- *Correction* : un fond sombre rond derrière la croix, et toucher la photo n'importe où la ferme. Le bouton retour d'Android fonctionnait déjà (`onRequestClose`).
+- *Leçon* : tester avec de vraies photos, pas seulement des images sombres. Toujours prévoir plusieurs façons de sortir d'un écran plein écran.
+
 **Le mauvais projet ouvert dans Expo Go**
 - Sur le Wi-Fi de l'école, Expo Go ouvrait le serveur d'un camarade.
 - *Solution* : le partage de connexion du téléphone, qui crée un réseau isolé.
@@ -280,6 +302,10 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 | Ta clé API est-elle protégée ? | Elle n'est pas dans le dépôt (`.env` ignoré). Mais une variable `EXPO_PUBLIC_` est intégrée à l'app : en production, je passerais par un serveur qui garde la clé. |
 | Que se passe-t-il sans réseau ? | Le `fetch` échoue, l'erreur est attrapée et la carte affiche « Météo indisponible pour le moment ». Le reste de l'écran (données SQLite locales) fonctionne. |
 | Comment choisis-tu la prévision parmi les 40 créneaux ? | Le créneau dont l'heure est la plus proche de celle de l'événement, à 3 h près. |
+| Où sont stockées les photos ? | Le fichier est copié dans le dossier document de l'app (le fichier du sélecteur est temporaire). La base ne garde que son chemin **relatif**, car le chemin absolu change à chaque mise à jour sur iOS. |
+| Pourquoi la galerie ne demande pas de permission ? | Le sélecteur du système ne donne à l'app que la photo choisie, pas toute la photothèque. Seul l'appareil photo demande une permission. |
+| Que deviennent les photos si on supprime l'événement ? | `ON DELETE CASCADE` supprime les lignes, mais pas les fichiers : je lis leurs chemins avant la suppression, puis j'efface les fichiers. |
+| Peut-on ajouter une photo sans avoir participé ? | Non : le bouton n'apparaît pas, et l'`INSERT … SELECT` ne s'exécute que si une participation existe et que l'événement est passé. |
 | Pourquoi « 3 personnes participent » et pas « participants » ? | C'est une formulation neutre, sans accord au genre, qui gère aussi le pluriel et le passé. |
 | Pourquoi des hooks personnalisés ? | Pour séparer la logique (chargement, erreurs) de l'affichage, et la réutiliser sur plusieurs écrans. |
 | `useEffect` : à quoi sert la fonction renvoyée ? | C'est le nettoyage : elle s'exécute quand l'écran est démonté ou avant le prochain effet (annuler un minuteur, ignorer une requête en cours). |

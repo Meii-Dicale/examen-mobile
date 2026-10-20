@@ -13,6 +13,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { LoadState } from '@/components/common/LoadState';
 import { AgendaButton } from '@/components/events/AgendaButton';
 import { ParticipationButton } from '@/components/events/ParticipationButton';
+import { PhotoGallery } from '@/components/events/PhotoGallery';
 import { WeatherCard } from '@/components/events/WeatherCard';
 import { Button, Card, Screen } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
@@ -20,10 +21,13 @@ import { useUserPosition } from '@/context/LocationContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useEvent } from '@/hooks/useEvent';
 import { useEventActions } from '@/hooks/useEventActions';
+import { useEventPhotos } from '@/hooks/useEventPhotos';
 import { useWeather } from '@/hooks/useWeather';
 import { fr } from '@/i18n/fr';
 import { CalendarPermissionError } from '@/services/deviceCalendar';
+import { CameraPermissionError, type PhotoSource } from '@/services/photoFiles';
 import type { Event } from '@/types/event';
+import type { EventPhoto } from '@/types/photo';
 import { spacing, typography } from '@/theme/tokens';
 import { formatEventDate, isPast } from '@/utils/date';
 import { distanceKm, formatDistance } from '@/utils/distance';
@@ -37,14 +41,66 @@ export default function EventDetail() {
   const { user } = useAuth();
   const position = useUserPosition();
   const { data: event, loading, error, reload } = useEvent(eventId);
-  const { remove, toggleParticipation, addToAgenda } = useEventActions();
+  const { remove, toggleParticipation, addToAgenda, addPhoto, removePhoto } = useEventActions();
   const weather = useWeather(event);
+  const photos = useEventPhotos(eventId);
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [addingToAgenda, setAddingToAgenda] = useState(false);
+  const [addingPhoto, setAddingPhoto] = useState(false);
 
   const isMine = event != null && event.createdBy === user?.id;
   const km = event ? distanceKm(position, event) : null;
+  const past = event != null && isPast(event.date);
+  const photoList = photos.data ?? [];
+  // Ajout réservé aux participant·es d'un événement passé (la requête SQL le vérifie aussi).
+  const canAddPhoto = past && event.isParticipating;
+
+  const handleAddPhoto = async (source: PhotoSource) => {
+    setAddingPhoto(true);
+    try {
+      const added = await addPhoto(eventId, source);
+      if (added) photos.reload();
+    } catch (err) {
+      if (err instanceof CameraPermissionError) {
+        Alert.alert(fr.photos.cameraDeniedTitle, fr.photos.cameraDeniedMessage, [
+          { text: fr.common.cancel, style: 'cancel' },
+          { text: fr.agenda.openSettings, onPress: () => Linking.openSettings() },
+        ]);
+      } else {
+        Alert.alert(fr.photos.addError);
+      }
+    } finally {
+      setAddingPhoto(false);
+    }
+  };
+
+  // Choix de la source : appareil photo ou galerie.
+  const choosePhotoSource = () => {
+    Alert.alert(fr.photos.chooseTitle, undefined, [
+      { text: fr.photos.camera, onPress: () => handleAddPhoto('camera') },
+      { text: fr.photos.library, onPress: () => handleAddPhoto('library') },
+      { text: fr.common.cancel, style: 'cancel' },
+    ]);
+  };
+
+  const confirmDeletePhoto = (photo: EventPhoto) => {
+    Alert.alert(fr.photos.deleteTitle, fr.photos.deleteMessage, [
+      { text: fr.common.cancel, style: 'cancel' },
+      {
+        text: fr.common.delete,
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            await removePhoto(photo);
+            photos.reload();
+          } catch {
+            Alert.alert(fr.photos.deleteError);
+          }
+        },
+      },
+    ]);
+  };
 
   const handleAddToAgenda = async (target: Event) => {
     setAddingToAgenda(true);
@@ -147,6 +203,18 @@ export default function EventDetail() {
               <Text style={[typography.section, { color: colors.muted }]}>{t.description}</Text>
               <Text style={[typography.body, { color: colors.text }]}>{event.description}</Text>
             </Card>
+
+            {/* Photos : seulement après l'événement, s'il y en a ou si on peut en ajouter. */}
+            {past && (canAddPhoto || photoList.length > 0) ? (
+              <PhotoGallery
+                photos={photoList}
+                currentUserId={user?.id}
+                canAdd={canAddPhoto}
+                adding={addingPhoto}
+                onAdd={choosePhotoSource}
+                onDelete={confirmDeletePhoto}
+              />
+            ) : null}
 
             {isMine ? (
               <View style={styles.actions}>
