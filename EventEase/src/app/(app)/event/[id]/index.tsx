@@ -13,12 +13,14 @@ import { EmptyState } from '@/components/common/EmptyState';
 import { LoadState } from '@/components/common/LoadState';
 import { AgendaButton } from '@/components/events/AgendaButton';
 import { ParticipationButton } from '@/components/events/ParticipationButton';
+import { WeatherCard } from '@/components/events/WeatherCard';
 import { Button, Card, Screen } from '@/components/ui';
 import { useAuth } from '@/context/AuthContext';
 import { useUserPosition } from '@/context/LocationContext';
 import { useTheme } from '@/context/ThemeContext';
 import { useEvent } from '@/hooks/useEvent';
 import { useEventActions } from '@/hooks/useEventActions';
+import { useWeather } from '@/hooks/useWeather';
 import { fr } from '@/i18n/fr';
 import { CalendarPermissionError } from '@/services/deviceCalendar';
 import type { Event } from '@/types/event';
@@ -36,6 +38,7 @@ export default function EventDetail() {
   const position = useUserPosition();
   const { data: event, loading, error, reload } = useEvent(eventId);
   const { remove, toggleParticipation, addToAgenda } = useEventActions();
+  const weather = useWeather(event);
   const [deleting, setDeleting] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [addingToAgenda, setAddingToAgenda] = useState(false);
@@ -122,6 +125,8 @@ export default function EventDetail() {
               <InfoRow icon="user" text={isMine ? fr.events.mine : fr.events.organisedBy(event.creatorName)} />
               <InfoRow icon="users" text={fr.participation.count(event.participantCount, isPast(event.date))} />
             </View>
+
+            <WeatherCard status={weather.status} weather={weather.weather} />
 
             <ParticipationButton
               isParticipating={event.isParticipating}

@@ -141,6 +141,16 @@ export const fr = {
     distance: (distance: string) => `à ${distance}`,
     distanceFromYou: (distance: string) => `À ${distance} de toi`,
   },
+  weather: {
+    // « 18:00 » est construit par formatTime (début du créneau de 3 h).
+    forecastAt: (time: string) => `Météo prévue à ${time}`,
+    wind: (kmh: number) => `vent ${kmh} km/h`,
+    rain: (percent: number) => `pluie ${percent} %`,
+    loading: 'Chargement de la météo…',
+    tooFar: 'La météo sera disponible 5 jours avant l’événement.',
+    unavailable: 'Prévision indisponible pour cette heure.',
+    error: 'Météo indisponible pour le moment.',
+  },
   profile: {
     title: 'Profil',
     memberSince: (date: string) => `Membre depuis le ${date}`,
