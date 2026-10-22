@@ -16,7 +16,7 @@ Conseils et arguments notés au fil du projet. Ce fichier est mis à jour à cha
 - **La veille de l'oral, repartir d'une base neuve**, sinon les dates ont glissé (l'événement « dans 2 jours » est peut-être déjà passé) :
   - iPhone : supprimer puis réinstaller Expo Go ;
   - Android : Réglages → Applications → Expo Go → Stockage → Effacer les données.
-- Les événements de démo sont **humoristiques** (lancer de chaussettes orphelines, pliage de drap-housse, Monopoly sans dispute…) : la démo est plus vivante, et le jury retient mieux.
+- Les événements de démo sont **humoristiques** et tournent autour du sport, des jeux vidéo et de la cuisine (footing anti-raclette, tournoi Mario Kart, soufflé qui ne retombe pas…) : la démo est plus vivante, et le jury retient mieux.
 
 ---
 

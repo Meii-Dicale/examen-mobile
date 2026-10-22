@@ -10,7 +10,8 @@
  * des événements dans moins de 5 jours (météo disponible), des événements plus
  * lointains, et des événements passés auxquels le compte démo a participé (photos).
  *
- * Les événements sont volontairement humoristiques, pour une démo plus vivante.
+ * Les événements sont volontairement humoristiques (sport, jeux vidéo, cuisine),
+ * pour une démo plus vivante.
  * Le seed ne tourne qu'à la création de la base : pour voir une modification,
  * il faut repartir d'une base neuve (supprimer les données de l'app ou d'Expo Go).
  */
@@ -77,10 +78,11 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   const demo = await insertUser(db, 'demo@eventease.fr', 'Alex Martin');
   const camille = await insertUser(db, 'camille@eventease.fr', 'Camille Bernard');
 
-  const picnic = await insertEvent(db, {
-    title: 'Pique-nique sans fourmis (on essaie)',
+  // Thèmes : sport, jeux vidéo et cuisine (deux événements chacun).
+  const footing = await insertEvent(db, {
+    title: 'Footing pour éliminer la raclette de dimanche',
     description:
-      "Chacun apporte un plat à partager. Les fourmis n'ont pas été invitées, mais elles viennent tous les ans.",
+      "10 km au rythme le plus lent du parc. Ravitaillement prévu : de l'eau, et pas de fromage cette fois.",
     date: daysFromNow(2, 12),
     locationName: "Parc de la Tête d'Or, Lyon",
     latitude: 45.7772,
@@ -89,9 +91,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   await insertEvent(db, {
-    title: 'Championnat de lancer de chaussettes orphelines',
+    title: 'Pokémon GO : la grande chasse de Bellecour',
     description:
-      'Ramène tes chaussettes sans partenaire. Record à battre : 14 mètres, vent dans le dos. Elles finissent ensuite à la ressourcerie.',
+      'On marche, on lance des Poké Balls, on rate des Poké Balls. Batterie externe fortement conseillée.',
     date: daysFromNow(4, 14),
     locationName: 'Place Bellecour, Lyon',
     latitude: 45.7578,
@@ -100,9 +102,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   await insertEvent(db, {
-    title: 'Atelier : plier un drap-housse',
+    title: 'Atelier : réussir un soufflé qui ne retombe pas',
     description:
-      'Enfin la vérité sur le pliage du drap-housse. Deux bénévoles expérimentés, aucune garantie de résultat.',
+      'Deux bénévoles, quatre fours et aucune garantie. Le soufflé raté se mange quand même.',
     date: daysFromNow(12, 10),
     locationName: 'Mairie du 7e arrondissement, Lyon',
     latitude: 45.7456,
@@ -111,9 +113,9 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   await insertEvent(db, {
-    title: 'Soirée Monopoly sans dispute',
+    title: 'Tournoi Mario Kart : carapaces bleues interdites',
     description:
-      'Objectif : finir une partie sans fâcher personne. Une médiatrice est présente, les billets sont comptés à l’avance.',
+      'Manettes fournies. Les amitiés brisées par une carapace bleue ne sont pas remboursées.',
     date: daysFromNow(25, 19),
     locationName: 'Croix-Rousse, Lyon',
     latitude: 45.7745,
@@ -121,10 +123,10 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
     createdBy: demo,
   });
 
-  const cleanup = await insertEvent(db, {
-    title: 'Chasse au trésor sur les berges du Rhône',
+  const orienteering = await insertEvent(db, {
+    title: "Course d'orientation sans GPS",
     description:
-      "On ramasse les déchets le long des quais. Un trophée récompense la trouvaille la plus improbable (l'an dernier : un grille-pain).",
+      "Carte papier et boussole uniquement. Tout le monde est rentré, certains à l'heure du goûter.",
     date: daysFromNow(-6, 9, 30),
     locationName: 'Berges du Rhône, Lyon',
     latitude: 45.7597,
@@ -132,10 +134,10 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
     createdBy: camille,
   });
 
-  const assembly = await insertEvent(db, {
-    title: 'Assemblée générale (avec croissants)',
+  const lasagna = await insertEvent(db, {
+    title: 'Concours de lasagnes : la recette de mamie contre le reste du monde',
     description:
-      "Bilan de l'année, vote du budget et élection du bureau. Des croissants sont promis pour atteindre le quorum.",
+      "Douze plats en compétition et un jury qui n'a pas dîné. Mamie a encore gagné.",
     date: daysFromNow(-20, 18, 30),
     locationName: 'Hôtel de Ville, Lyon',
     latitude: 45.7676,
@@ -144,8 +146,8 @@ export async function seedDemoData(db: SQLiteDatabase): Promise<void> {
   });
 
   // Le compte démo a participé aux deux événements passés : il pourra y ajouter des photos.
-  await insertParticipation(db, demo, cleanup);
-  await insertParticipation(db, demo, assembly);
-  // Camille participe au pique-nique : le compteur de participants n'est pas à 0.
-  await insertParticipation(db, camille, picnic);
+  await insertParticipation(db, demo, orienteering);
+  await insertParticipation(db, demo, lasagna);
+  // Camille participe au footing : le compteur de participants n'est pas à 0.
+  await insertParticipation(db, camille, footing);
 }
