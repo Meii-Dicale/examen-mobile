@@ -289,6 +289,13 @@ Le jury apprécie qu'on raconte un bug et sa démarche de résolution.
 - Sur le Wi-Fi de l'école, Expo Go ouvrait le serveur d'un camarade.
 - *Solution* : le partage de connexion du téléphone, qui crée un réseau isolé.
 
+**La CI cassée sans aucun changement de code** (fix/deps-expo-57)
+- *Symptôme* : une PR qui ne modifiait que les données de démo avait sa CI rouge, alors qu'elle était verte deux jours plus tôt.
+- *Démarche* : j'ai lu le log de l'étape en échec. C'était `npx expo install --check` (« Found outdated dependencies »), pas le lint ni le typage.
+- *Cause* : entre-temps, Expo avait publié des versions correctives (`expo` 57.0.31, `expo-router` 57.0.29…). La vérification exige les dernières versions compatibles avec le SDK.
+- *Correction* : une branche dédiée, avec `npx expo install --fix`, puis lint et typage relancés. Une fois fusionnée, les autres PR repassent au vert après une mise à jour depuis `main`.
+- *Leçon* : la CI dépend aussi du monde extérieur. Une correction de dépendances va dans sa propre PR, séparée des fonctionnalités, pour qu'on sache ce qui a changé.
+
 ---
 
 ## 9. Questions probables du jury — réponses courtes
