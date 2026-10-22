@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>EventEase — Soutenance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+  /* Diaporama de la soutenance : 13 slides de 1920 × 1080, mises à l'échelle de la fenêtre.
+     Flèches ou espace : slide suivante / précédente. N : notes d'orateur. F : plein écran.
+     Impression (Cmd + P) : une slide par page, pour un export PDF. */
+  * { box-sizing: border-box; margin: 0; }
+  html, body { height: 100%; background: #140C18; overflow: hidden; }
+  .stage { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .deck > section { position: absolute; left: 50%; top: 50%; width: 1920px; height: 1080px;
+    transform-origin: center; overflow: hidden; }
+  /* Le style en ligne de chaque slide fixe display (flex ou grid) : !important pour masquer les autres. */
+  @media screen { .deck > section:not(.active) { display: none !important; } }
+  h1, h2, h3 { font-weight: 600; }
+  ul, ol { padding-left: 1.3em; }
+  li + li { margin-top: 0.3em; }
+  table { border-collapse: separate; border-spacing: 0; overflow: hidden; width: 100%; }
+  th, td { padding: 0.6em 0.9em; text-align: left; vertical-align: top; }
+  td { border-top: 1px solid #E8DDE6; }
+  th { font-weight: 700; }
+  .notes { display: none; }
+  body.show-notes .deck > section.active .notes { display: block; position: fixed; left: 0; right: 0; bottom: 0;
+    max-height: 40vh; overflow: auto; padding: 16px 24px; background: rgba(20, 12, 24, 0.94); color: #F6EEF7;
+    font: 18px/1.5 Montserrat, Arial, sans-serif; transform: none; }
+  @media print {
+    @page { size: 1920px 1080px; margin: 0; }
+    html, body { overflow: visible; height: auto; background: none; }
+    .stage { position: static; display: block; }
+    .deck > section { position: relative; left: 0; top: 0; transform: none !important;
+      page-break-after: always; break-after: page; }
+    .notes { display: none !important; }
+  }
+</style>
+</head>
+<body>
+<main class="stage">
+<div class="deck">
+<section id="cover" data-transition="fade" style="background:#7A2E8E;color:#FBF7FA;font-family:'Montserrat', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;gap:40px">
+<svg aria-label="" width="80" height="60" viewBox="10 22 80 60" style="position:absolute;left:1120px;top:280px;width:720px;height:540px;opacity:0.1"><path d="M20 22 H80 A10 10 0 0 1 90 32 V44 A8 8 0 0 0 90 60 V72 A10 10 0 0 1 80 82 H20 A10 10 0 0 1 10 72 V60 A8 8 0 0 0 10 44 V32 A10 10 0 0 1 20 22 Z" fill="#FBF7FA"/></svg>
+<svg aria-label="Logo EventEase : un ticket d’entrée avec une coche" width="80" height="60" viewBox="10 22 80 60" style="width:200px;height:150px"><path d="M20 22 H80 A10 10 0 0 1 90 32 V44 A8 8 0 0 0 90 60 V72 A10 10 0 0 1 80 82 H20 A10 10 0 0 1 10 72 V60 A8 8 0 0 0 10 44 V32 A10 10 0 0 1 20 22 Z" fill="#FBF7FA"/><path d="M33 52 L45 64 L67 40" fill="none" stroke="#FF9466" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div style="display:flex;flex-direction:column;gap:24px">
+<h1 style="font-family:'Montserrat', Arial, sans-serif;font-size:128px;font-weight:800;line-height:1.05;letter-spacing:-2px;color:#FBF7FA">EventEase</h1>
+<p style="font-size:40px;font-weight:500;line-height:1.3;color:#F3E3F6;width:1000px">Les événements de ton association, au même endroit.</p>
+</div>
+<p style="font-size:26px;font-weight:600;color:#2A1730;background:#FF9466;padding:12px 28px;border-radius:999px;width:620px">Application mobile React Native · Expo</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1200px;font-size:26px;color:#F3E3F6">Lorelei WANNYN · Soutenance CDA, examen mobile · Octobre 2026</p>
+<aside class="notes">≈ 20 s. Se présenter, annoncer le projet : EventEase, une app mobile pour qu’une association gère ses événements. Annoncer le déroulé : le besoin, les choix techniques, une démo sur le téléphone, puis le recul (un bug, les limites).</aside>
+</section>
+<section id="besoin" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:64px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">Le contexte</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Réunir les membres d’une association autour de ses événements</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDFE;padding:44px;border:2px solid #E8DDE6;border-radius:24px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:56px;height:56px"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+<h3 style="font-size:40px;font-weight:700;color:#2A1730">Organiser</h3>
+<p style="font-size:28px;line-height:1.45;color:#62506A">Créer, modifier et supprimer ses propres événements.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDFE;padding:44px;border:2px solid #E8DDE6;border-radius:24px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:56px;height:56px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+<h3 style="font-size:40px;font-weight:700;color:#2A1730">Consulter</h3>
+<p style="font-size:28px;line-height:1.45;color:#62506A">La liste, le calendrier, et un détail avec météo et distance.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDFE;padding:44px;border:2px solid #E8DDE6;border-radius:24px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:56px;height:56px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+<h3 style="font-size:40px;font-weight:700;color:#2A1730">Participer</h3>
+<p style="font-size:28px;line-height:1.45;color:#62506A">« Je participe », l’ajout à l’agenda du téléphone, les photos souvenirs.</p>
+</div>
+</div>
+<p style="font-size:30px;font-weight:500;color:#2A1730">Un prototype en <b>4 jours</b>, sans back-end : tout est stocké sur le téléphone.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">2 / 13</p>
+<aside class="notes">≈ 40 s. L’association EventEase veut une app pour ses membres. Trois usages : organiser (CRUD de ses événements), consulter (liste, calendrier, détail), participer. Contrainte du sujet : un prototype sans vrai back-end, donc persistance locale.</aside>
+</section>
+<section id="obligatoires" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">Le cahier des charges</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Toutes les fonctionnalités obligatoires sont couvertes</h2>
+</div>
+<table style="font-family:'Montserrat', Arial, sans-serif;font-size:28px;color:#2A1730;background:#FFFDFE;border:2px solid #E8DDE6;border-radius:24px">
+<tr style="background:#F3E3F6"><th style="width:34%;text-align:left">Exigence</th><th style="width:66%;text-align:left">Réalisation</th></tr>
+<tr><td>Connexion, inscription</td><td>Comptes en SQLite, mot de passe haché, session gardée</td></tr>
+<tr><td>Liste des événements</td><td>Titre, description, date ; sections À venir / Passés</td></tr>
+<tr><td>Ajouter, modifier, supprimer</td><td>Un formulaire partagé, réservé au créateur</td></tr>
+<tr><td>Marquer sa participation</td><td>« Je participe », compteur, onglet Profil</td></tr>
+<tr><td>Persistance locale</td><td>SQLite, SecureStore (session), AsyncStorage (thème)</td></tr>
+<tr><td>Navigation</td><td>Expo Router, construit sur React Navigation</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">3 / 13</p>
+<aside class="notes">≈ 45 s. Parcourir vite le tableau : chaque exigence du sujet a sa réponse. Insister sur deux points : la suppression demande une confirmation et efface aussi les participations (CASCADE) ; seul le créateur voit Modifier / Supprimer. Expo Router respecte la contrainte « React Navigation » car il est construit dessus.</aside>
+</section>
+<section id="stack" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">Les choix techniques</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Une stack choisie pour Expo Go et pour les données</h2>
+</div>
+<table style="font-family:'Montserrat', Arial, sans-serif;font-size:26px;color:#2A1730;background:#FFFDFE;border:2px solid #E8DDE6;border-radius:24px">
+<tr style="background:#F3E3F6"><th style="width:17%;text-align:left">Besoin</th><th style="width:31%;text-align:left">Choix</th><th style="width:52%;text-align:left">Pourquoi</th></tr>
+<tr><td>Base</td><td>Expo SDK 57, TypeScript strict</td><td>Supporté par Expo Go ; erreurs vues avant l’exécution</td></tr>
+<tr><td>Navigation</td><td>Expo Router</td><td>Construit sur React Navigation : un fichier = un écran</td></tr>
+<tr><td>Données</td><td>expo-sqlite</td><td>Données relationnelles : contraintes, cascade, tri</td></tr>
+<tr><td>Session</td><td>expo-secure-store</td><td>Chiffré par le système (Keychain, Keystore)</td></tr>
+<tr><td>Thème</td><td>AsyncStorage</td><td>Une simple préférence, rien de sensible</td></tr>
+<tr><td>Animations</td><td>Reanimated</td><td>Splash animé calculé sur le thread UI</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">4 / 13</p>
+<aside class="notes">≈ 50 s. SDK 57 et pas 58 : le 58 venait de sortir et Expo Go ne le supportait pas encore. SQLite plutôt qu’AsyncStorage : utilisateurs, événements, participations et photos sont liés ; SQLite garantit l’e-mail unique, une seule participation par personne, la suppression en cascade, et trie par date. Avec AsyncStorage il faudrait tout coder à la main sur du JSON. AsyncStorage ne garde que le thème.</aside>
+</section>
+<section id="architecture" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">L’architecture</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Chaque couche a une seule responsabilité</h2>
+</div>
+<div style="display:flex;align-items:center;gap:20px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#7A2E8E;padding:32px;border-radius:20px">
+<h3 style="font-size:36px;font-weight:700;color:#FBF7FA">Écran</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#F3E3F6">src/app/</p>
+<p style="font-size:26px;color:#FBF7FA">Affiche, réagit aux appuis</p>
+</div>
+<svg aria-hidden="true" viewBox="0 0 56 24" style="flex:none;width:56px;height:24px"><line x1="0" y1="12" x2="52" y2="12" stroke="#62506A" stroke-width="4"/><polyline points="40,2 52,12 40,22" fill="none" stroke="#62506A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFDFE;padding:32px;border:2px solid #7A2E8E;border-radius:20px">
+<h3 style="font-size:36px;font-weight:700;color:#7A2E8E">Hook</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#62506A">src/hooks/</p>
+<p style="font-size:26px;color:#2A1730">data, loading, error, reload</p>
+</div>
+<svg aria-hidden="true" viewBox="0 0 56 24" style="flex:none;width:56px;height:24px"><line x1="0" y1="12" x2="52" y2="12" stroke="#62506A" stroke-width="4"/><polyline points="40,2 52,12 40,22" fill="none" stroke="#62506A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFFDFE;padding:32px;border:2px solid #7A2E8E;border-radius:20px">
+<h3 style="font-size:36px;font-weight:700;color:#7A2E8E">Service</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#62506A">src/services/</p>
+<p style="font-size:26px;color:#2A1730">Le SQL ou le fetch</p>
+</div>
+<svg aria-hidden="true" viewBox="0 0 56 24" style="flex:none;width:56px;height:24px"><line x1="0" y1="12" x2="52" y2="12" stroke="#62506A" stroke-width="4"/><polyline points="40,2 52,12 40,22" fill="none" stroke="#62506A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FFE9DF;padding:32px;border-radius:20px">
+<h3 style="font-size:36px;font-weight:700;color:#9A3A10">Source</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#9A3A10">SQLite · API</p>
+<p style="font-size:26px;color:#2A1730">Base, OpenWeather, système</p>
+</div>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;border-left:6px solid #FF9466;padding:8px 32px">
+<h3 style="font-size:32px;font-weight:700;color:#2A1730">Jamais de SQL ni de fetch dans un écran</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">On peut changer la base sans toucher à l’affichage.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;border-left:6px solid #FF9466;padding:8px 32px">
+<h3 style="font-size:32px;font-weight:700;color:#2A1730">useFocusQuery, écrit une seule fois</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">La requête se relance au retour sur l’écran : la liste est à jour après une création.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">5 / 13</p>
+<aside class="notes">≈ 50 s. Le flux : l’écran appelle un hook, le hook appelle un service, le service parle à SQLite ou à l’API. Règle reprise de mon projet YouAreTheHero. useFocusQuery gère chargement, erreur et annulation pour tous les hooks de lecture ; il utilise useFocusEffect, donc pas besoin d’un état global pour rafraîchir. Piège : la requête passée doit être stable (useCallback), sinon elle tourne en boucle. État global limité à trois Contexts : Auth, Theme, Location.</aside>
+</section>
+<section id="donnees" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">La base de données</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Quatre tables, et la base garantit les règles</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px;font-family:'JetBrains Mono', 'Courier New', monospace">
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDFE;padding:20px 28px;border:2px solid #E8DDE6;border-radius:16px">
+<p style="font-size:26px;font-weight:600;color:#7A2E8E">users</p>
+<p style="font-size:24px;color:#62506A">email UNIQUE NOCASE · password_hash · salt</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDFE;padding:20px 28px;border:2px solid #E8DDE6;border-radius:16px">
+<p style="font-size:26px;font-weight:600;color:#7A2E8E">events</p>
+<p style="font-size:24px;color:#62506A">date ISO · latitude · longitude · created_by</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDFE;padding:20px 28px;border:2px solid #E8DDE6;border-radius:16px">
+<p style="font-size:26px;font-weight:600;color:#7A2E8E">participations</p>
+<p style="font-size:24px;color:#62506A">PRIMARY KEY (user_id, event_id)</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px;background:#FFFDFE;padding:20px 28px;border:2px solid #E8DDE6;border-radius:16px">
+<p style="font-size:26px;font-weight:600;color:#7A2E8E">event_photos</p>
+<p style="font-size:24px;color:#62506A">event_id · user_id · uri (chemin relatif)</p>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:32px;font-weight:700;color:#2A1730">Migrations versionnées</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">PRAGMA user_version, une transaction par migration : jamais une base à moitié migrée.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:32px;font-weight:700;color:#2A1730">Intégrité</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">foreign_keys activé à chaque ouverture, ON DELETE CASCADE, pas de double participation.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h3 style="font-size:32px;font-weight:700;color:#2A1730">Requêtes paramétrées</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">Les valeurs passent par « ? », jamais concaténées : pas d’injection SQL.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">6 / 13</p>
+<aside class="notes">≈ 50 s. user_version vaut 0 sur une base neuve : on ne joue que les migrations manquantes, et on n’en modifie jamais une existante. SQLite ignore les clés étrangères par défaut, d’où PRAGMA foreign_keys = ON à chaque ouverture, sinon la cascade ne ferait rien. Dates en ISO 8601 : l’ordre alphabétique est l’ordre chronologique, ORDER BY date suffit, avec un index. Une seule requête pour la liste : COUNT des participants et LEFT JOIN sur ma participation, pas de problème N+1. Contraintes testées avec sqlite3.</aside>
+</section>
+<section id="securite" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">La sécurité</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Ne jamais faire confiance à l’interface seule</h2>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDFE;padding:32px 40px;border:2px solid #E8DDE6;border-radius:20px">
+<h3 style="font-size:32px;font-weight:700;color:#7A2E8E">Mots de passe</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">SHA-256 avec un sel aléatoire par compte. Jamais stockés en clair.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDFE;padding:32px 40px;border:2px solid #E8DDE6;border-radius:20px">
+<h3 style="font-size:32px;font-weight:700;color:#7A2E8E">Session</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">Seul l’id, dans SecureStore. Stack.Protected bloque l’app sans session.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDFE;padding:32px 40px;border:2px solid #E8DDE6;border-radius:20px">
+<h3 style="font-size:32px;font-weight:700;color:#7A2E8E">Droits vérifiés en SQL</h3>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:24px;color:#2A1730;background:#F3E3F6;padding:10px 16px;border-radius:10px">UPDATE … WHERE id = ? AND created_by = ?</p>
+<p style="font-size:26px;line-height:1.45;color:#62506A">Masquer un bouton ne protège pas d’un lien direct.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px;background:#FFFDFE;padding:32px 40px;border:2px solid #E8DDE6;border-radius:20px">
+<h3 style="font-size:32px;font-weight:700;color:#7A2E8E">Clé d’API</h3>
+<p style="font-size:26px;line-height:1.45;color:#62506A">Dans .env, ignoré par git. Mais EXPO_PUBLIC_ est intégré à l’app : en production, un serveur garderait la clé.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">7 / 13</p>
+<aside class="notes">≈ 1 min. Le sel rend inutiles les rainbow tables. Pourquoi pas bcrypt ou argon2 : les versions natives ne marchent pas dans Expo Go, bcryptjs fige l’interface environ 1 s ; sur un vrai serveur je hacherais avec argon2. Même message pour e-mail inconnu et mauvais mot de passe (pas d’énumération des comptes). Le User de l’app ne contient jamais le hash. Droits : vérifiés deux fois, bouton masqué ET clause SQL ; testé avec sqlite3, changes = 0. Même principe pour les photos : INSERT … SELECT qui exige une participation à un événement passé, DELETE … AND user_id = ?.</aside>
+</section>
+<section id="bonus" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">Les bonus</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Les quatre bonus du sujet, plus un bonus personnel</h2>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:32px;background:#FFFDFE;padding:22px 36px;border:2px solid #E8DDE6;border-radius:18px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:48px;height:48px"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+<p style="font-size:30px;font-weight:700;color:#2A1730;width:360px">Calendrier</p>
+<p style="font-size:26px;color:#62506A;flex:1">Affiché dans l’app, et ajout à l’agenda du téléphone sans doublon</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FFFDFE;padding:22px 36px;border:2px solid #E8DDE6;border-radius:18px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:48px;height:48px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+<p style="font-size:30px;font-weight:700;color:#2A1730;width:360px">Lieu et distance</p>
+<p style="font-size:26px;color:#62506A;flex:1">Géocodage du lieu saisi, distance de Haversine depuis ma position</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FFFDFE;padding:22px 36px;border:2px solid #E8DDE6;border-radius:18px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:48px;height:48px"><path d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"/></svg>
+<p style="font-size:30px;font-weight:700;color:#2A1730;width:360px">Météo</p>
+<p style="font-size:26px;color:#62506A;flex:1">OpenWeather : le créneau le plus proche de l’heure de l’événement</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FFFDFE;padding:22px 36px;border:2px solid #E8DDE6;border-radius:18px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:48px;height:48px"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+<p style="font-size:30px;font-weight:700;color:#2A1730;width:360px">Design</p>
+<p style="font-size:26px;color:#62506A;flex:1">Palette Prune et pêche, thème clair ou sombre, logo SVG, splash animé</p>
+</div>
+<div style="display:flex;align-items:center;gap:32px;background:#FFE9DF;padding:22px 36px;border:2px solid #FF9466;border-radius:18px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#9A3A10;width:48px;height:48px"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+<p style="font-size:30px;font-weight:700;color:#9A3A10;width:360px">Photos (perso)</p>
+<p style="font-size:26px;color:#2A1730;flex:1">Sur un événement passé auquel on a participé, caméra ou galerie</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">8 / 13</p>
+<aside class="notes">≈ 40 s, les détails viendront dans la démo. Calendrier : deux librairies, react-native-calendars affiche, expo-calendar écrit dans l’agenda (id stocké dans participations pour éviter les doublons). Lieu : coordonnées calculées une fois à l’enregistrement, la position n’est jamais stockée. Météo : l’API gratuite prévoit 5 jours, on le sait avant d’appeler. Photos : le fichier temporaire est copié dans le dossier document de l’app, la base garde un chemin relatif.</aside>
+</section>
+<section id="demo" data-transition="fade" style="background:#FF9466;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:grid;grid-template-columns:640px 1fr;gap:96px;align-items:center">
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-family:'Montserrat', Arial, sans-serif;font-size:128px;font-weight:800;line-height:1.05;letter-spacing:-2px;color:#2A1730">Démo</h1>
+<p style="font-size:30px;font-weight:500;line-height:1.4;color:#2A1730">Sur le téléphone, avec Expo Go.</p>
+<p style="font-family:'JetBrains Mono', 'Courier New', monospace;font-size:26px;color:#2A1730;background:#FFE9DF;padding:16px 24px;border-radius:14px">demo@eventease.fr<br>demo1234</p>
+</div>
+<ol style="font-size:30px;line-height:1.5;color:#2A1730">
+<li>Connexion, puis relance : la session est gardée</li>
+<li>Créer un événement : « Lieu reconnu »</li>
+<li>Détail : météo, distance, « Je participe »</li>
+<li>Ajout à l’agenda du téléphone</li>
+<li>Calendrier : un point par jour d’événement</li>
+<li>Autre compte : pas de bouton Modifier</li>
+<li>Événement passé : ajouter une photo</li>
+<li>Passage en mode sombre</li>
+</ol>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#2A1730;text-align:right">9 / 13</p>
+<aside class="notes">≈ 3 min. Avant de passer : Mac sur le partage de connexion de l’iPhone, npx expo start -c, app déjà ouverte. Second compte : camille@eventease.fr / demo1234. Les données de démo sont datées par rapport au jour du lancement : il y a toujours un événement dans moins de 5 jours (météo) et des événements passés (photos). Si la météo ne charge pas (réseau), le dire : la carte affiche « Météo indisponible » et le reste marche hors ligne.</aside>
+</section>
+<section id="bug" data-transition="fade" style="background:#2A1730;color:#F6EEF7;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#FFA680">Un bug raconté</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#F6EEF7">L’écran blanc, sans aucune erreur</h2>
+</div>
+<div style="display:flex;gap:24px">
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#3B2845;padding:36px;border-radius:20px">
+<p style="font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#FFA680">1 · Symptôme</p>
+<p style="font-size:28px;line-height:1.45;color:#F6EEF7">Écran blanc au démarrage, au hasard.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#3B2845;padding:36px;border-radius:20px">
+<p style="font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#FFA680">2 · Démarche</p>
+<p style="font-size:28px;line-height:1.45;color:#F6EEF7">Un console.log à chaque étape : polices, base, splash.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#3B2845;padding:36px;border-radius:20px">
+<p style="font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#FFA680">3 · Cause</p>
+<p style="font-size:28px;line-height:1.45;color:#F6EEF7">SQLiteProvider est en React.memo : l’état des polices ne descendait pas.</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:14px;background:#3B2845;padding:36px;border-radius:20px">
+<p style="font-size:24px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:#FFA680">4 · Correction</p>
+<p style="font-size:28px;line-height:1.45;color:#F6EEF7">useFonts déplacé sous le provider.</p>
+</div>
+</div>
+<p style="font-size:40px;font-weight:600;line-height:1.3;color:#F6EEF7;border-left:6px solid #FF9466;padding:4px 36px">L’état doit vivre au plus près de là où il est utilisé.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#BBA8C2">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#BBA8C2;text-align:right">10 / 13</p>
+<aside class="notes">≈ 50 s. Indice décisif : les logs disaient « polices chargées : true », mais l’enfant recevait toujours fontsReady = false. J’ai lu le code source d’expo-sqlite : SQLiteProvider est mémoïsé avec une comparaison qui ignore ses enfants. Leçon : memo évite des rendus inutiles mais peut bloquer une mise à jour attendue. Autre bug possible si on me demande : « Zzzzz » à 1 611 km, le géocodeur renvoie toujours le lieu le plus ressemblant, donc le formulaire affiche maintenant « Lieu reconnu : Ville, Pays ».</aside>
+</section>
+<section id="qualite" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">La qualité</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Une méthode de travail et une app accessible</h2>
+</div>
+<div style="display:flex;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDFE;padding:44px;border:2px solid #E8DDE6;border-radius:24px">
+<div style="display:flex;align-items:center;gap:20px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:48px;height:48px"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+<h3 style="font-size:36px;font-weight:700;color:#2A1730">Git et CI</h3>
+</div>
+<ul style="font-size:26px;line-height:1.5;color:#62506A">
+<li>Une branche et une pull request par fonctionnalité</li>
+<li>GitHub Actions : npm ci, expo install --check, lint, tsc</li>
+<li>main protégée : CI verte obligatoire, fusion en squash</li>
+<li>Commentaires en français qui expliquent le pourquoi</li>
+</ul>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px;background:#FFFDFE;padding:44px;border:2px solid #E8DDE6;border-radius:24px">
+<div style="display:flex;align-items:center;gap:20px">
+<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex:none;color:#7A2E8E;width:48px;height:48px"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+<h3 style="font-size:36px;font-weight:700;color:#2A1730">Accessibilité</h3>
+</div>
+<ul style="font-size:26px;line-height:1.5;color:#62506A">
+<li>Contrastes WCAG AA, en clair comme en sombre</li>
+<li>Zones tactiles d’au moins 48 px</li>
+<li>Rôles et libellés pour VoiceOver et TalkBack</li>
+<li>« Réduire les animations » respecté</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">11 / 13</p>
+<aside class="notes">≈ 40 s. Résultat de la méthode : main fonctionne toujours, chaque fusion est passée par la CI. TypeScript strict détecte beaucoup d’erreurs avant de lancer l’app. Accessibilité : la couleur pêche ne sert que de fond, le texte orange utilise accentInk, plus foncé ; les erreurs de formulaire sont annoncées (accessibilityLiveRegion) ; l’onglet actif est signalé par une barre, pas seulement par la couleur. Tous les textes sont dans i18n/fr.ts.</aside>
+</section>
+<section id="limites" data-transition="fade" style="background:#F8F4F7;color:#2A1730;font-family:'Montserrat', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:56px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:#9A3A10">Le recul</p>
+<h2 style="font-family:'Montserrat', Arial, sans-serif;font-size:64px;font-weight:700;line-height:1.15;color:#2A1730">Des limites assumées, et la suite en production</h2>
+</div>
+<table style="font-family:'Montserrat', Arial, sans-serif;font-size:26px;color:#2A1730;background:#FFFDFE;border:2px solid #E8DDE6;border-radius:24px">
+<tr style="background:#F3E3F6"><th style="width:50%;text-align:left">Limite du prototype</th><th style="width:50%;text-align:left">En production</th></tr>
+<tr><td>Données et photos sur un seul téléphone</td><td>Une API et une base partagées</td></tr>
+<tr><td>SHA-256 est un hachage rapide</td><td>argon2, côté serveur</td></tr>
+<tr><td>Clé EXPO_PUBLIC_ lisible dans l’app</td><td>Un serveur qui garde la clé</td></tr>
+<tr><td>L’agenda n’est pas mis à jour si l’événement change</td><td>Synchronisation et notifications</td></tr>
+<tr><td>Pas de tests automatisés</td><td>Jest sur les fonctions pures</td></tr>
+</table>
+<p style="position:absolute;left:128px;bottom:64px;width:900px;font-size:24px;color:#62506A">EventEase · Soutenance CDA</p>
+<p style="position:absolute;right:128px;bottom:64px;width:200px;font-size:24px;color:#62506A;text-align:right">12 / 13</p>
+<aside class="notes">≈ 30 s. Montrer que je connais les limites : elles viennent surtout de l’absence de serveur, imposée par le sujet. Les fonctions pures (Haversine, validation, choix du créneau météo) sont déjà isolées dans utils/ et services/, donc faciles à tester. Expo Go affiche sa propre icône : la vraie icône n’apparaît que dans une build EAS.</aside>
+</section>
+<section id="merci" data-transition="fade" style="background:#7A2E8E;color:#FBF7FA;font-family:'Montserrat', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:40px">
+<svg aria-label="Logo EventEase : un ticket d’entrée avec une coche" width="80" height="60" viewBox="10 22 80 60" style="width:160px;height:120px"><path d="M20 22 H80 A10 10 0 0 1 90 32 V44 A8 8 0 0 0 90 60 V72 A10 10 0 0 1 80 82 H20 A10 10 0 0 1 10 72 V60 A8 8 0 0 0 10 44 V32 A10 10 0 0 1 20 22 Z" fill="#FBF7FA"/><path d="M33 52 L45 64 L67 40" fill="none" stroke="#FF9466" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/></svg>
+<h1 style="font-family:'Montserrat', Arial, sans-serif;font-size:128px;font-weight:800;line-height:1.05;letter-spacing:-2px;color:#FBF7FA;text-align:center">Merci</h1>
+<p style="font-size:40px;font-weight:500;color:#F3E3F6;text-align:center">Place à vos questions.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#F3E3F6;text-align:center">Lorelei WANNYN · EventEase · Soutenance CDA</p>
+<aside class="notes">Remercier le jury. Pour les questions, s’appuyer sur la section 9 de docs/notes-oral.md. Si on demande à voir du code : architecture (services/events.ts et useFocusQuery), sécurité (UPDATE … AND created_by = ?), photos (INSERT … SELECT).</aside>
+</section>
+</div>
+</main>
+<script>
+  const slides = [...document.querySelectorAll('.deck > section')];
+  let current = Math.max(0, slides.findIndex((s) => '#' + s.id === location.hash));
+
+  function fit() {
+    const scale = Math.min(innerWidth / 1920, innerHeight / 1080);
+    slides.forEach((s) => (s.style.transform = `translate(-50%, -50%) scale(${scale})`));
+  }
+  function show(index) {
+    current = Math.min(slides.length - 1, Math.max(0, index));
+    slides.forEach((s, i) => s.classList.toggle('active', i === current));
+    history.replaceState(null, '', '#' + slides[current].id);
+  }
+  addEventListener('keydown', (e) => {
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' '].includes(e.key)) show(current + 1);
+    else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) show(current - 1);
+    else if (e.key === 'Home') show(0);
+    else if (e.key === 'End') show(slides.length - 1);
+    else if (e.key === 'n' || e.key === 'N') document.body.classList.toggle('show-notes');
+    else if (e.key === 'f' || e.key === 'F') document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen();
+  });
+  addEventListener('click', (e) => show(current + (e.clientX < innerWidth / 3 ? -1 : 1)));
+  addEventListener('resize', fit);
+  fit();
+  show(current);
+</script>
+</body>
+</html>
