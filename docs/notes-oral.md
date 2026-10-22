@@ -12,7 +12,11 @@ Conseils et arguments notés au fil du projet. Ce fichier est mis à jour à cha
   - Le code passe directement du Mac au téléphone ; seuls les appels Internet (météo) utilisent les données mobiles.
 - Lance `npx expo start -c` avant de passer, et vérifie que l'app s'ouvre.
 - **Compte démo** : `demo@eventease.fr` / `demo1234`. Un second compte, `camille@eventease.fr` / `demo1234`, montre qu'on ne peut pas modifier l'événement de quelqu'un d'autre.
-- Les données de démo sont datées **par rapport au jour du lancement**. Il y a donc toujours un événement dans moins de 5 jours (la météo s'affiche) et des événements passés (photos).
+- Les données de démo sont datées **par rapport au jour où la base est créée** (premier lancement). Il y a alors un événement dans moins de 5 jours (la météo s'affiche) et des événements passés (photos).
+- **La veille de l'oral, repartir d'une base neuve**, sinon les dates ont glissé (l'événement « dans 2 jours » est peut-être déjà passé) :
+  - iPhone : supprimer puis réinstaller Expo Go ;
+  - Android : Réglages → Applications → Expo Go → Stockage → Effacer les données.
+- Les événements de démo sont **humoristiques** et tournent autour du sport, des jeux vidéo et de la cuisine (footing anti-raclette, tournoi Mario Kart, soufflé qui ne retombe pas…) : la démo est plus vivante, et le jury retient mieux.
 
 ---
 
